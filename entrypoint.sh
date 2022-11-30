@@ -26,6 +26,7 @@ validate() {
   : PHP_LINT="${PHP_LINT:="FALSE"}"
   : CACHE_CLEAR="${CACHE_CLEAR:="TRUE"}"
   : SCRIPT="${SCRIPT:=''}"
+  : TRACK_USER="${TRACK_USER:='wpe-cicd'}"
 }
 
 setup_env() {
@@ -49,8 +50,8 @@ setup_env() {
 
   # Set up WPE user and path
   WPE_SSH_USER="${WPE_ENV_NAME}"@"${WPE_SSH_HOST}"
-  WPE_FULL_HOST=wpe_bbp+"$WPE_SSH_USER"
-  WPE_DESTINATION=wpe_bbp+"${WPE_SSH_USER}":sites/"${WPE_ENV_NAME}"/"${DIR_PATH}"
+  WPE_FULL_HOST="${TRACK_USER}+$WPE_SSH_USER"
+  WPE_DESTINATION="${TRACK_USER}+${WPE_SSH_USER}":sites/"${WPE_ENV_NAME}"/"${DIR_PATH}"
 }
 
 setup_ssh_dir() {
@@ -132,7 +133,7 @@ sync_files() {
         if [[ $status -ne 0 && -f ${SCRIPT} ]]; then
           ssh -v -p 22 -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST" "mkdir -p sites/${WPE_ENV_NAME}/$(dirname "${SCRIPT}")"
 
-          rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${SCRIPT}" "wpe_gha+$WPE_SSH_USER:sites/$WPE_ENV_NAME/$(dirname "${SCRIPT}")"
+          rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${SCRIPT}" "${TRACK_USER}+$WPE_SSH_USER:sites/$WPE_ENV_NAME/$(dirname "${SCRIPT}")"
         fi
       fi
 
