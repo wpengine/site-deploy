@@ -21,12 +21,12 @@ You can use this image to deploy a site from your local machine.
 3. Create a `.env` file with the following variables, changing their values as needed.
 
 ```sh
-INPUT_WPE_ENV=yourinstall # The target WP Engine install name.
-GITHUB_REF=main           # Inconsequential, but must be defined for now.
-INPUT_REMOTE_PATH=
-INPUT_SRC_PATH=.
-INPUT_PHP_LINT=TRUE
-INPUT_CACHE_CLEAR=TRUE
+WPE_ENV=yourinstall # The target WP Engine install name.
+GIT_REF=main           # Inconsequential, but must be defined for now.
+REMOTE_PATH=
+SRC_PATH=.
+PHP_LINT=TRUE
+CACHE_CLEAR=TRUE
 ```
 
 3. Set an environment variable with your private SSH key, replacing the key file name with your own.
@@ -41,7 +41,7 @@ export INPUT_WPE_SSHG_KEY_PRIVATE=`cat ~/.ssh/my_sshg_key_rsa`
     -e "INPUT_WPE_SSHG_KEY_PRIVATE" \
     -e "INPUT_FLAGS=-azvr --inplace --exclude=\".*\"" \
     --env-file ./.env \
-    -v /path/to/your/install:/site \
+    -v /Users/marcos.schratzenstaller/workspace/wpe/qpdnpsx22q:/site \
     --workdir=/site \
     wpengine/site-deploy:latest
 ```
