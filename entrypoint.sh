@@ -121,10 +121,6 @@ sync_files() {
   echo "!!! MULTIPLEX SSH CONNECTION ESTABLISHED !!!"
 
   rsync --rsh="ssh -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no" "${FLAGS}" --exclude-from='/exclude.txt' --chmod=D775,F664 ${SRC_PATH} "${WPE_DESTINATION}"
-
-  if [[ -n ${SCRIPT} || -n ${CACHE_CLEAR} ]]; then 
-    ssh -v -p 22 -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST" "cd sites/${WPE_ENV_NAME} ${SCRIPT} ${CACHE_CLEAR}"
-  fi 
   
   if [[ -n ${SCRIPT} || -n ${CACHE_CLEAR} ]]; then
 
@@ -139,6 +135,8 @@ sync_files() {
           rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${SCRIPT}" "wpe_gha+$WPE_SSH_USER:sites/$WPE_ENV_NAME/$(dirname "${SCRIPT}")"
         fi
       fi
+
+      SCRIPT="&& bash ${SCRIPT}"
 
       ssh -v -p 22 -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST" "cd sites/${WPE_ENV_NAME} ${SCRIPT} ${CACHE_CLEAR}"
   fi 
