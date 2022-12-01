@@ -30,21 +30,34 @@ Merging the versioning PR will run a workflow that creates or updates all necess
 
 ## Managing the Dockerfile & Docker Image
 
-The base of the `Dockerfile` is hosted as a Docker image on DockerHub. The image is originally built locally from `Dockerfiles/Dockerfile` and pushed up to DockerHub.
+The `Dockerfile` is hosted as a Docker image on DockerHub: [wpengine/sitedeploy](https://hub.docker.com/r/wpengine/site-deploy).
 
-The main `Dockerfile` at the project root imports the `wpengine/site-deploy:base-stable` hosted image from DockerHub.
+The Docker image is used in both [wpengine/github-action-wpe-site-deploy](https://github.com/wpengine/github-action-wpe-site-deploy) GitHub Action and the [azunigawpe/wpe-bb-deploy](https://bitbucket.org/azunigawpe/wpe-bb-deploy/src/main/) BitBucket Pipeline. Any customizations to the image should consider the effect on both services.
 
-All other customizations that are updated less frequently, or managed by 3rd parties, should be added to the `base-stable` image. Rebuild and push the image to DockerHub to update the image.
+Any other customizations that are uniquely required can be added to the Dockerfile in the project itself.
 
 ## Updating the Docker Image
-The `base-stable` Docker Image will rarely need to be updated, however it may be necessary to update it manually* from time to time.
 
-- Build the docker image locally:
-`docker build --no-cache -t wpengine/site-deploy:base-stable Dockerfiles`
+The `latest` Docker Image will be updated automatically after merging into the `main` branch.
+`wpengine/site-deploy:latest`
 
-- Push the image to DockerHub:
-`docker push wpengine/site-deploy:base-stable`
 
-Once the hosted Docker image is updated, it will need to be imported (or updated) on the main project `Dockerfile`. If the Dockerhub tag name (image version) has changed, update the existing line in the project root `Dockerfile` to match the new tag name.
-- Update the root Docker file for the project with the latest version of the Docker Image:tagname. i.e.:
-`FROM wpengine/site-deploy:base-stable`
+A versioned Docker Image will be automatically generated for each release of this repository, based on the tag name
+`wpengine/site-deploy:{tagName}`
+
+Additional Docker Images will be automatically generated for each branch to use in testing.
+`wpengine/site-deploy:branch-{branchName}`
+
+## Manually updating the Docker Image
+
+You can also build and version this image using make targets when necessary.
+
+```
+make build       # Builds the image locally
+make version     # Builds the image and creates version tags
+make list-images # Shows all tagged versions of the image
+make clean       # Deletes all tagged versions of the image
+```
+
+To push a custom version of the image to DockerHub:
+`docker push wpengine/site-deploy:{tagName}`
