@@ -65,23 +65,23 @@ setup_ssh_dir() {
 
 check_lint() {
   if [ "${PHP_LINT^^}" == "TRUE" ]; then
-    echo "Begin PHP Linting."
-    for file in $(find ${SRC_PATH}/ -name "*.php"); do
-        php -l "$file"
-        status=$?
-        if [[ $status -ne 0 ]]; then
-            echo "FAILURE: Linting failed - $file :: $status" && exit 1
-        fi
-    done
-      echo "PHP lint successful! No errors detected!"
+      echo "Begin PHP Linting."
+      find "$SRC_PATH"/ -name "*.php" -type f -print0 | while IFS= read -r -d '' file; do
+          php -l "$file"
+          status=$?
+          if [[ $status -ne 0 ]]; then
+              echo "FAILURE: Linting failed - $file :: $status" && exit 1
+          fi
+      done
+      echo "PHP Lint Successful! No errors detected!"
   else 
-      echo "Skipping PHP lint..."
+      echo "Skipping PHP Linting."
   fi
 }
 
 check_cache() {
   if [ "${CACHE_CLEAR^^}" == "TRUE" ]; then
-      CACHE_CLEAR="&& wp page-cache flush"
+      CACHE_CLEAR="&& wp --skip-plugins --skip-themes page-cache flush && wp --skip-plugins --skip-themes cdn-cache flush"
     elif [ "${CACHE_CLEAR^^}" == "FALSE" ]; then
         CACHE_CLEAR=""
     else echo "CACHE_CLEAR value must be set as TRUE or FALSE only... Cache not cleared..."  && exit 1;
