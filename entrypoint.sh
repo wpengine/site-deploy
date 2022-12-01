@@ -36,7 +36,7 @@ setup_env() {
   # Set up WPE user and path
   WPE_SSH_USER="${WPE_ENV_NAME}"@"${WPE_SSH_HOST}"
   WPE_FULL_HOST="${CICD_VENDOR}+$WPE_SSH_USER"
-  WPE_DESTINATION="${CICD_VENDOR}+${WPE_SSH_USER}":sites/"${WPE_ENV_NAME}"/"${DIR_PATH}"
+  WPE_DESTINATION="${CICD_VENDOR}+${WPE_SSH_USER}:sites/${WPE_ENV_NAME}"/"${DIR_PATH}"
 }
 
 setup_ssh_dir() {
@@ -93,6 +93,7 @@ sync_files() {
   ssh -nNf -v -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlMaster=yes -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST"
   echo "!!! MULTIPLEX SSH CONNECTION ESTABLISHED !!!"
 
+  # shellcheck disable=SC2086
   rsync --rsh="ssh -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no" ${FLAGS} --exclude-from='/exclude.txt' --chmod=D775,F664 ${SRC_PATH} "${WPE_DESTINATION}"
   
   if [[ -n ${SCRIPT} || -n ${CACHE_CLEAR} ]]; then
