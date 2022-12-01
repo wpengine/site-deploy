@@ -2,20 +2,6 @@
 
 set -e
 
-# : "${INPUT_WPE_SSHG_KEY_PRIVATE?Required secret not set.}"
-
-# #Alias logic for ENV names 
-# if [[ -n ${INPUT_WPE_ENV} ]]; then
-#     WPE_ENV_NAME="${INPUT_WPE_ENV}";
-#   elif [[ -n ${INPUT_PRD_ENV} ]]; then
-#     WPE_ENV_NAME="${INPUT_PRD_ENV}";
-#   elif [[ -n ${INPUT_STG_ENV} ]]; then
-#     WPE_ENV_NAME="${INPUT_STG_ENV}";
-#   elif [[ -n ${INPUT_DEV_ENV} ]]; then  
-#     WPE_ENV_NAME="${INPUT_DEV_ENV}";
-#   else echo "Failure: Missing environment variable..."  && exit 1;
-# fi
-
 validate() {
   # mandatory params
   : WPE_SSHG_KEY_PRIVATE="${WPE_SSHG_KEY_PRIVATE:?'WPE_SSHG_KEY_PRIVATE variable missing from Repo or Workspace variables.'}"
@@ -25,8 +11,8 @@ validate() {
   : FLAGS="${FLAGS:="-azvr --inplace --exclude=".*""}"
   : PHP_LINT="${PHP_LINT:="FALSE"}"
   : CACHE_CLEAR="${CACHE_CLEAR:="TRUE"}"
-  : SCRIPT="${SCRIPT:=''}"
-  : TRACK_USER="${TRACK_USER:='wpe-cicd'}"
+  : SCRIPT="${SCRIPT:=""}"
+  : CICD_VENDOR="${CICD_VENDOR:="wpe-cicd"}"
 }
 
 setup_env() {
@@ -46,12 +32,11 @@ setup_env() {
 
   WPE_SSH_HOST="${WPE_ENV_NAME}.ssh.wpengine.net"
   DIR_PATH="${REMOTE_PATH}"
-  echo "${WPE_ENV_NAME}"
 
   # Set up WPE user and path
   WPE_SSH_USER="${WPE_ENV_NAME}"@"${WPE_SSH_HOST}"
-  WPE_FULL_HOST="${TRACK_USER}+$WPE_SSH_USER"
-  WPE_DESTINATION="${TRACK_USER}+${WPE_SSH_USER}":sites/"${WPE_ENV_NAME}"/"${DIR_PATH}"
+  WPE_FULL_HOST="${CICD_VENDOR}+$WPE_SSH_USER"
+  WPE_DESTINATION="${CICD_VENDOR}+${WPE_SSH_USER}":sites/"${WPE_ENV_NAME}"/"${DIR_PATH}"
 }
 
 setup_ssh_dir() {
@@ -72,14 +57,10 @@ setup_ssh_dir() {
   WPE_SSHG_KEY_PRIVATE_PATH="${SSH_PATH}/wpe_id_rsa"
   umask  077 ; echo "${WPE_SSHG_KEY_PRIVATE}" > "${WPE_SSHG_KEY_PRIVATE_PATH}"
   chmod 600 "${WPE_SSHG_KEY_PRIVATE_PATH}"
-  echo "${WPE_SSH_HOST}"
   #establish knownhosts 
   KNOWN_HOSTS_PATH="${SSH_PATH}/known_hosts"
   ssh-keyscan -t rsa "${WPE_SSH_HOST}" >> "${KNOWN_HOSTS_PATH}"
   chmod 644 "${KNOWN_HOSTS_PATH}"
-
-  cat /root/.ssh/wpe_id_rsa
-
 }
 
 check_lint() {
@@ -107,21 +88,12 @@ check_cache() {
   fi
 }
 
-fix_file_perms() {
-  echo "prepparing file perms..."
-  find "$SRC_PATH" -type d -exec chmod -R 775 {} \;
-  find "$SRC_PATH" -type f -exec chmod -R 664 {} \;
-  echo "file perms set..."
-}
-
 sync_files() {
-  echo "Deploying ${GIT_REF} branch to ${WPE_ENV_NAME}..."
-  
   #create multiplex connection 
   ssh -nNf -v -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlMaster=yes -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST"
   echo "!!! MULTIPLEX SSH CONNECTION ESTABLISHED !!!"
 
-  rsync --rsh="ssh -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no" "${FLAGS}" --exclude-from='/exclude.txt' --chmod=D775,F664 ${SRC_PATH} "${WPE_DESTINATION}"
+  rsync --rsh="ssh -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no" ${FLAGS} --exclude-from='/exclude.txt' --chmod=D775,F664 ${SRC_PATH} "${WPE_DESTINATION}"
   
   if [[ -n ${SCRIPT} || -n ${CACHE_CLEAR} ]]; then
 
@@ -133,11 +105,13 @@ sync_files() {
         if [[ $status -ne 0 && -f ${SCRIPT} ]]; then
           ssh -v -p 22 -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST" "mkdir -p sites/${WPE_ENV_NAME}/$(dirname "${SCRIPT}")"
 
-          rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${SCRIPT}" "${TRACK_USER}+$WPE_SSH_USER:sites/$WPE_ENV_NAME/$(dirname "${SCRIPT}")"
+          rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${SCRIPT}" "${CICD_VENDOR}+$WPE_SSH_USER:sites/$WPE_ENV_NAME/$(dirname "${SCRIPT}")"
         fi
       fi
 
-      SCRIPT="&& bash ${SCRIPT}"
+      if [[ -n ${SCRIPT} ]]; then
+        SCRIPT="&& bash ${SCRIPT}"
+      fi
 
       ssh -v -p 22 -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST" "cd sites/${WPE_ENV_NAME} ${SCRIPT} ${CACHE_CLEAR}"
   fi 
@@ -149,9 +123,7 @@ sync_files() {
 
 validate
 setup_env
-# enable_debug
 setup_ssh_dir
-fix_file_perms
 check_lint
 check_cache
 sync_files
