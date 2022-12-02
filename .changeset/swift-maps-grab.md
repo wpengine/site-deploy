@@ -4,18 +4,18 @@
 
 # Refactor the Main Script
 
-These updates the main script to be more generic and allow the script and image to be used around other CI/CD Vendors.
+Updates the main script to be more generic and allow the script and image to be used around other CI/CD Vendors.
 
 In order to use this script, each CI/CD vendor will need to set the environment variables accordingly:
 
 ```sh
-REMOTE_PATH # Defualt is empty
+REMOTE_PATH # Default is empty
 SRC_PATH # Default is the current directory
 FLAGS # Default is -azvr --inplace --exclude=".*"
 PHP_LINT # Default is "FALSE"
 CACHE_CLEAR # Default is "TRUE"
 SCRIPT # Default is empty
-CICD_VENDOR= # Default is "wpe-cicd"
+CICD_VENDOR # Default is "wpe-cicd"
 ```
 
 Example of how to run this image:
