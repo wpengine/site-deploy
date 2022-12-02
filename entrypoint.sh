@@ -6,8 +6,8 @@ validate() {
   # mandatory params
   : WPE_SSHG_KEY_PRIVATE="${WPE_SSHG_KEY_PRIVATE:?'WPE_SSHG_KEY_PRIVATE variable missing from Repo or Workspace variables.'}"
   # optional params
-  : REMOTE_PATH="${REMOTE_PATH:=''}"
-  : SRC_PATH="${SRC_PATH:='.'}"
+  : REMOTE_PATH="${REMOTE_PATH:=""}"
+  : SRC_PATH="${SRC_PATH:="."}"
   : FLAGS="${FLAGS:="-azvr --inplace --exclude=".*""}"
   : PHP_LINT="${PHP_LINT:="FALSE"}"
   : CACHE_CLEAR="${CACHE_CLEAR:="TRUE"}"
