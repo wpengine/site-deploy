@@ -1,0 +1,44 @@
+---
+name: "Deploy WordPress to WP Engine"
+description: "Local copy of the site deployment GitHub Action used for testing the Docker image directly"
+inputs:
+  WPE_SSHG_KEY_PRIVATE:
+    description: "The private RSA key you will save in the Github Secrets"
+    required: true
+  WPE_ENV:
+    description: "Destination to deploy to WPE"
+    required: false
+  PHP_LINT:
+    description: "optional php syntax check"
+    required: false
+  FLAGS:
+    description: "Optional flags for the deployment"
+    required: false
+  CACHE_CLEAR:
+    description: "Optional WPE Clear cache"
+    required: false
+  SRC_PATH:
+    description: "An optional source directory to deploy other than the root directory that is being versioned."
+    default: "."
+    required: false
+  REMOTE_PATH:
+    description: "An optional destination directory to deploy to other than the WordPress root."
+    default: ""
+    required: false
+  SCRIPT:
+    description: "File containing custom scripts run after the rsync"
+    required: false
+
+runs:
+  using: "docker"
+  image: "../../Dockerfile"
+  env:
+    WPE_SSHG_KEY_PRIVATE: ${{ inputs.WPE_SSHG_KEY_PRIVATE }}
+    WPE_ENV: ${{ inputs.WPE_ENV }}
+    REMOTE_PATH: ${{ inputs.REMOTE_PATH }}
+    SRC_PATH: ${{ inputs.SRC_PATH }}
+    FLAGS: ${{ inputs.FLAGS }}
+    PHP_LINT: ${{ inputs.PHP_LINT }}
+    CACHE_CLEAR: ${{ inputs.CACHE_CLEAR }}
+    SCRIPT: ${{ inputs.SCRIPT }}
+    CICD_VENDOR: 'e2e-tests'
