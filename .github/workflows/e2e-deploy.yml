@@ -17,8 +17,8 @@ jobs:
       status: ${{ steps.deploy.outputs.status }}
     steps: 
       - uses: actions/checkout@v3
-      # - name: Bump test plugin version number
-      #   run: sed -i 's/0.0.1/0.0.2/' tests/data/plugins/test-plugin/test-plugin.php
+      - name: Bump test plugin version number
+        run: sed -i 's/0.0.1/0.0.2/' tests/data/plugins/test-plugin/test-plugin.php
       - name: Deploy to WP Engine
         id: deploy
         uses: ./.github/actions/deploy
@@ -31,15 +31,15 @@ jobs:
           REMOTE_PATH: "wp-content/plugins/"
           PHP_LINT: true
           FLAGS: -r --backup --backup-dir=/tmp --itemize-changes
-          # SCRIPT: "tests/data/post-deploy/test-plugin.sh"
+          SCRIPT: "tests/data/post-deploy/test-plugin.sh"
           CACHE_CLEAR: true
-  # validate_result:
-  #   runs-on: ubuntu-latest
-  #   needs: run_action
-  #   steps:
-  #     - name: Validate deploy results
-  #       run: |
-  #         [ ${{needs.run_action.outputs.status}} = "pass" ] || exit 1
+  validate_result:
+    runs-on: ubuntu-latest
+    needs: run_action
+    steps:
+      - name: Validate deploy results
+        run: |
+          [ ${{needs.run_action.outputs.status}} = "pass" ] || exit 1
       # - name: Notify slack on failure
       #   if: failure() && github.ref == 'refs/heads/main'
       #   env:
