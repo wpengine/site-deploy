@@ -94,7 +94,7 @@ sync_files() {
   echo "!!! MULTIPLEX SSH CONNECTION ESTABLISHED !!!"
 
   # shellcheck disable=SC2086
-  rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" ${FLAGS} --exclude-from='/exclude.txt' --chmod=D775,F664 "${SRC_PATH}" "${WPE_DESTINATION}"
+  # rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" ${FLAGS} --exclude-from='/exclude.txt' --chmod=D775,F664 "${SRC_PATH}" "${WPE_DESTINATION}"
   
   if [[ -n ${SCRIPT} || -n ${CACHE_CLEAR} ]]; then
 
