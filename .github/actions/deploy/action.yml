@@ -41,4 +41,3 @@ runs:
     PHP_LINT: ${{ inputs.PHP_LINT }}
     CACHE_CLEAR: ${{ inputs.CACHE_CLEAR }}
     SCRIPT: ${{ inputs.SCRIPT }}
-    CICD_VENDOR: 'e2e_tests'
