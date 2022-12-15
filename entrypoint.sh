@@ -12,7 +12,6 @@ validate() {
   : PHP_LINT="${PHP_LINT:="FALSE"}"
   : CACHE_CLEAR="${CACHE_CLEAR:="TRUE"}"
   : SCRIPT="${SCRIPT:=""}"
-  : CICD_VENDOR="${CICD_VENDOR:="wpe-cicd"}"
 }
 
 setup_env() {
@@ -25,6 +24,13 @@ setup_env() {
     elif [[ -n ${DEV_ENV} ]]; then  
       WPE_ENV_NAME="${DEV_ENV}";
     else echo "Failure: Missing environment variable..."  && exit 1;
+  fi
+
+  if [[ -n ${GITHUB_ACTIONS} ]]; then
+      CICD_VENDOR="wpe_gha";
+    elif [[ -n ${BITBUCKET_BUILD_NUMBER} ]]; then
+      CICD_VENDOR="wpe_bb";
+    else CICD_VENDOR="wpe_cicd"
   fi
 
   echo "Deploying your code to:"
@@ -55,7 +61,13 @@ setup_ssh_dir() {
 
   #Copy secret keys to container 
   WPE_SSHG_KEY_PRIVATE_PATH="${SSH_PATH}/wpe_id_rsa"
-  umask  077 ; echo "${WPE_SSHG_KEY_PRIVATE}" > "${WPE_SSHG_KEY_PRIVATE_PATH}"
+
+  if [ "${CICD_VENDOR}" == "wpe_bb" ]; then
+    # Only Bitbucket keys require base64 decode
+    umask  077 ; echo "${WPE_SSHG_KEY_PRIVATE}" | base64 -d > "${WPE_SSHG_KEY_PRIVATE_PATH}"
+    else umask  077 ; echo "${WPE_SSHG_KEY_PRIVATE}" > "${WPE_SSHG_KEY_PRIVATE_PATH}"
+  fi
+
   chmod 600 "${WPE_SSHG_KEY_PRIVATE_PATH}"
   #establish knownhosts 
   KNOWN_HOSTS_PATH="${SSH_PATH}/known_hosts"
