@@ -22,26 +22,25 @@ You can use this image to deploy a site from your local machine.
 
 ```sh
 WPE_ENV=yourinstall # The target WP Engine install name.
-GIT_REF=main           # Inconsequential, but must be defined for now.
 REMOTE_PATH=
 SRC_PATH=.
 PHP_LINT=TRUE
 CACHE_CLEAR=TRUE
+SCRIPT=
 ```
 
 3. Set an environment variable with your private SSH key, replacing the key file name with your own.
 
 ```sh
-export INPUT_WPE_SSHG_KEY_PRIVATE=`cat ~/.ssh/my_sshg_key_rsa`
+export WPE_SSHG_KEY_PRIVATE=`cat ~/.ssh/my_sshg_key_rsa`
 ```
-4. Replace `/path/to/your/install` with the absolute path to your local site and run the deploy!
+4. Run the deploy!
 
 ```sh
- docker run \
-    -e "INPUT_WPE_SSHG_KEY_PRIVATE" \
-    -e "INPUT_FLAGS=-azvr --inplace --exclude=\".*\"" \
+ docker run --rm \
+    -e "WPE_SSHG_KEY_PRIVATE" \
     --env-file ./.env \
-    -v /Users/marcos.schratzenstaller/workspace/wpe/qpdnpsx22q:/site \
+    -v $(pwd):/site \
     --workdir=/site \
     wpengine/site-deploy:latest
 ```
