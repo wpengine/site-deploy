@@ -2,26 +2,24 @@
 "@wpengine/site-deploy": major
 ---
 
-# Refactor the Main Script
+Updates the main script to be more generic, allowing it to be used around different CI/CD Vendors.
 
-Updates the main script to be more generic and allow the script and image to be used around other CI/CD Vendors.
-
-In order to use this script, each CI/CD vendor will need to set the environment variables accordingly:
+In order to use this image, each CI/CD vendor implementation will need to set the environment variables accordingly:
 
 ```sh
+WPE_ENV # The target WP Engine install name
 REMOTE_PATH # Default is empty
 SRC_PATH # Default is the current directory
 FLAGS # Default is -azvr --inplace --exclude=".*"
 PHP_LINT # Default is "FALSE"
 CACHE_CLEAR # Default is "TRUE"
 SCRIPT # Default is empty
-CICD_VENDOR # Default is "wpe-cicd"
 ```
 
 Example of how to run this image:
 
 ```sh
- docker run \
+ docker run --rm \
     -e "WPE_SSHG_KEY_PRIVATE" \
     --env-file ./.env \
     -v <full_path_of_site>:/site \
