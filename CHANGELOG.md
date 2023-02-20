@@ -1,5 +1,11 @@
 # @wpengine/site-deploy
 
+## 1.0.1
+
+### Patch Changes
+
+- 20cff22: Update instrumentisto/rsync-ssh base image to alpine3.17
+
 ## 1.0.0
 
 ### Major Changes
