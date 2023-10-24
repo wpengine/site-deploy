@@ -1,4 +1,4 @@
-FROM instrumentisto/rsync-ssh:alpine3.17
+FROM instrumentisto/rsync-ssh:alpine3.18
 # Intsall dependencies
 RUN apk add bash php
 # Add entrypoint and excludes
