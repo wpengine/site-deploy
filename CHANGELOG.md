@@ -1,5 +1,12 @@
 # @wpengine/site-deploy
 
+## 1.0.2
+
+### Patch Changes
+
+- d8b8469: Bump @changesets/cli > 2.26.2 (resolves semver vulnerability)
+- 4283418: Bump alpine 3.17 > 3.18
+
 ## 1.0.1
 
 ### Patch Changes
