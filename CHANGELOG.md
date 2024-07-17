@@ -1,5 +1,13 @@
 # @wpengine/site-deploy
 
+## 1.0.3
+
+### Patch Changes
+
+- f1e6867: Bump node version for dev tooling
+- 43ebea6: Update base image alpine 3.18 > 3.20 and apply updates
+- 504f3db: Update dev tooling npm dependencies
+
 ## 1.0.2
 
 ### Patch Changes
