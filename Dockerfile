@@ -7,6 +7,7 @@ RUN apk update \
             php \
  && rm -rf /var/cache/apk/*
 # Add entrypoint and excludes
+ADD functions.sh /functions.sh
 ADD entrypoint.sh /entrypoint.sh
 ADD exclude.txt /exclude.txt
 ENTRYPOINT ["/entrypoint.sh"]
