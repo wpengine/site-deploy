@@ -20,13 +20,22 @@ You can use this image to deploy a site from your local machine.
 2. Change directories into the root of the local site you'd like to deploy.
 3. Create a `.env` file with the following variables, changing their values as needed.
 
+> [!WARNING]  
+> Since `docker run` does not strip double-quotes from variables in the .env file, we don't use them
+> to wrap entire variable values. Instead, we must use single or double-quotes around flag values that
+> contain whitespace to prevent splitting (`--filter=':= .gitignore'`). The `=` sign between the flag
+> and its value is also required (`--filter=':= .gitignore'` rather than `--filter ':= .gitignore'`).
+
 ```sh
-WPE_ENV=yourinstall # The target WP Engine install name.
+# Required. The target WP Engine install name.
+WPE_ENV=yourinstall
+# Optional. Default values shown.
 REMOTE_PATH=
 SRC_PATH=.
-PHP_LINT=TRUE
+PHP_LINT=FALSE
 CACHE_CLEAR=TRUE
 SCRIPT=
+FLAGS=-azvr --inplace --exclude='.*'
 ```
 
 3. Set an environment variable with your private SSH key, replacing the key file name with your own.

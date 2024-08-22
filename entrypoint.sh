@@ -2,13 +2,19 @@
 
 set -e
 
+# Get the directory of the current script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source the functions.sh file relative to the current script's location
+source "${SCRIPT_DIR}/functions.sh"
+
 validate() {
   # mandatory params
   : WPE_SSHG_KEY_PRIVATE="${WPE_SSHG_KEY_PRIVATE:?'WPE_SSHG_KEY_PRIVATE variable missing from Repo or Workspace variables.'}"
   # optional params
   : REMOTE_PATH="${REMOTE_PATH:=""}"
   : SRC_PATH="${SRC_PATH:="."}"
-  : FLAGS="${FLAGS:="-azvr --inplace --exclude=".*""}"
+  : FLAGS="${FLAGS:="-azvr --inplace --exclude='.*'"}"
   : PHP_LINT="${PHP_LINT:="FALSE"}"
   : CACHE_CLEAR="${CACHE_CLEAR:="TRUE"}"
   : SCRIPT="${SCRIPT:=""}"
@@ -33,8 +39,8 @@ setup_env() {
     else CICD_VENDOR="wpe_cicd"
   fi
 
-  echo "Deploying your code to:"
-  echo "${WPE_ENV_NAME}"
+  parse_flags "$FLAGS"
+  print_deployment_info
 
   WPE_SSH_HOST="${WPE_ENV_NAME}.ssh.wpengine.net"
   DIR_PATH="${REMOTE_PATH}"
@@ -105,8 +111,9 @@ sync_files() {
   ssh -nNf -v -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlMaster=yes -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST"
   echo "!!! MULTIPLEX SSH CONNECTION ESTABLISHED !!!"
 
-  # shellcheck disable=SC2086
-  rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" ${FLAGS} --exclude-from='/exclude.txt' --chmod=D775,F664 "${SRC_PATH}" "${WPE_DESTINATION}"
+  set -x
+  rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${FLAGS_ARRAY[@]}" --exclude-from='/exclude.txt' --chmod=D775,F664 "${SRC_PATH}" "${WPE_DESTINATION}"
+  set +x
   
   if [[ -n ${SCRIPT} || -n ${CACHE_CLEAR} ]]; then
 
