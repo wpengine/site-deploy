@@ -32,6 +32,7 @@ jobs:
         with:
           commit: "Version Image"
           title: "Version Image"
+          version: npm run version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
