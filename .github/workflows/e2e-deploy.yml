@@ -9,6 +9,9 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-main
+  cancel-in-progress: false
 
 jobs:
   run_action:
@@ -21,7 +24,7 @@ jobs:
         uses: ./.github/actions/deploy
         with:
           # Deploy vars 
-          WPE_SSHG_KEY_PRIVATE: ${{ secrets.WPE_SSHG_KEY_PRIVATE }} 
+          WPE_SSHG_KEY_PRIVATE: ${{ secrets.WPE_SSHG_KEY_PRIVATE }}
           WPE_ENV: sitedeploye2e
           # Deploy Options
           SRC_PATH: "tests/data/plugins/test-plugin"
