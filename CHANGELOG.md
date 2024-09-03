@@ -1,5 +1,12 @@
 # @wpengine/site-deploy
 
+## 1.0.4
+
+### Patch Changes
+
+- 30cdd52: Fixes a bug that caused certain flags in the FLAGS option to be incorrectly parsed by rsync
+- f8fa689: Adds wp-cache-memcached to default excludes list
+
 ## 1.0.3
 
 ### Patch Changes
