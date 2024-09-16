@@ -36,6 +36,15 @@ test_parse_flags() {
   echo -e "${GREEN}Test passed for FLAGS=\"$test_case\".${NC}"
 }
 
+test_make_relative_remote() {
+    SRC_PATH=$1
+    REMOTE_PATH=$2
+
+    # Test resulting directory structure from calling make_relative_remote
+    # with the given SRC_PATH and REMOTE_PATH
+    # Expected output is the directory structure after moving the contents of SRC_PATH to REMOTE_PATH
+}
+
 # Test cases
 test_parse_flags \
   "-azvr --inplace --exclude='.*'" \
