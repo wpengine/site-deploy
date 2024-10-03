@@ -1,4 +1,4 @@
-FROM instrumentisto/rsync-ssh:alpine3.20 AS build
+FROM instrumentisto/rsync-ssh:alpine3.20
 # Intsall dependencies
 RUN apk update \
  && apk upgrade \
@@ -12,5 +12,3 @@ ADD entrypoint.sh /entrypoint.sh
 ADD exclude.txt /exclude.txt
 ENTRYPOINT ["/entrypoint.sh"]
 
-FROM build AS test
-COPY tests /tests
