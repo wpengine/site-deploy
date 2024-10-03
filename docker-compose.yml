@@ -1,0 +1,23 @@
+services:
+  test:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: wpengine/site-deploy:latest
+    platform: linux/amd64
+    entrypoint: /bin/bash -c "/app/tests/test_functions.sh && tail -f /dev/null"
+    volumes:
+      - .:/app
+      - ./tests:/app/tests/tmp
+    depends_on:
+      - build
+    working_dir: /app/tests/tmp
+
+  build:
+    image: wpengine/site-deploy:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /bin/true

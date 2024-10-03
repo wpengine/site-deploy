@@ -24,4 +24,4 @@ version: build
 
 test:
 	@echo 🧪 Executing Unit Tests...
-	docker run --rm -it $(IMAGE_NAME) --entrypoint tests/test_functions.sh
+	docker compose up

@@ -42,18 +42,24 @@ make_relative_remote() {
     # Echo the paths for debugging
     echo "SRC_PATH: $SRC_PATH"
     echo "REMOTE_PATH: $REMOTE_PATH"
-    # mkdir -p "$REMOTE_PATH"
+    mkdir -p "$REMOTE_PATH"
     echo "Would have moved contents of SRC_PATH to REMOTE_PATH"
   
-    # if [ "$SRC_PATH" == "." ]; then
-    #     # Use a temporary directory to avoid moving REMOTE_PATH into itself
-    #     TMP_DIR=$(mktemp -d)
-    #     mv "$SRC_PATH"/* "$TMP_DIR"
-    #     mv "$TMP_DIR"/* "$REMOTE_PATH"
-    #     rmdir "$TMP_DIR"
-    # else
-    #     mv "$SRC_PATH"/* "$REMOTE_PATH"
-    # fi
+    if [ "$SRC_PATH" == "." ]; then
+    # Ensure there are files to move
+      if [ "$(ls -A)" ]; then
+          mv * "$REMOTE_PATH"
+      else
+          echo "No files to move in the current directory."
+      fi
+    else
+      # Ensure there are files to move
+      if [ "$(ls -A "$SRC_PATH")" ]; then
+        mv "$SRC_PATH"/* "$REMOTE_PATH"
+      else
+        echo "No files to move in $SRC_PATH."
+      fi
+    fi
 }
 
 

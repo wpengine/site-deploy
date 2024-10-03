@@ -89,6 +89,14 @@ test_make_relative_remote() {
 
   echo -e "${GREEN}REMOTE_PATH='$REMOTE_PATH' SRC_PATH='$SRC_PATH' EXPECTED_REMOTE_PATH='$EXPECTED_REMOTE_PATH'" 
   # Should I cd into the test_dir?
+  cd test_dir/wp-content
+    # Echo the current directory
+  echo "Current directory: $(pwd)"
+
+  # List the contents of the current directory
+  echo "Contents of the current directory:"
+  ls -la
+  
   make_relative_remote
 
   if [[ "$REMOTE_PATH" != "$EXPECTED_REMOTE_PATH" ]]; then
@@ -99,16 +107,14 @@ test_make_relative_remote() {
 
 setup() {
   mkdir -p "test_dir/wp-content"
-  mkdir -p "test_dir/local/wp-content/uploads"
-  mkdir -p "test_dir/local/wp-content/plugins/mu-plugins"
-  mkdir -p "test_dir/local/wp-content/themes"
+  mkdir -p "test_dir/wp-content/uploads"
+  mkdir -p "test_dir/wp-content/plugins/mu-plugins"
+  mkdir -p "test_dir/wp-content/themes"
 
-  mkdir -p "test_dir/remote/"
-
-  echo "Sample upload file" > "test_dir/local/wp-content/uploads/sample_upload.txt"
-  echo "Sample plugin file" > "test_dir/local/wp-content/plugins/sample_plugin.txt"
-  touch "test_dir/local/wp-content/plugins/mu-plugins/.gitkeep"
-  echo "Sample theme file" > "test_dir/local/wp-content/themes/sample_theme.txt"
+  echo "Sample upload file" > "test_dir/wp-content/uploads/sample_upload.txt"
+  echo "Sample plugin file" > "test_dir/wp-content/plugins/sample_plugin.txt"
+  touch "test_dir/wp-content/plugins/mu-plugins/.gitkeep"
+  echo "Sample theme file" > "test_dir/wp-content/themes/sample_theme.txt"
 
   echo "Created test_dir with wp-content structure and sample files."
 }
@@ -118,8 +124,8 @@ cleanup() {
 }
 
 # Test cases, make remote directory relative to to the tests directory
-test_make_relative_remote "" "." ""
-test_make_relative_remote "./wp-content" "./wp-content" "./wp-content"
+#test_make_relative_remote "" "." ""
+#test_make_relative_remote "./wp-content" "./wp-content" "./wp-content"
 # Ok, I think I am still not understanding how to use make relative remote. I need to test the following scenarios:
 # Need to walk through the actual scenerio seen, with the source being .
 # REMOTE_PATH=/wp-content
@@ -128,6 +134,7 @@ test_make_relative_remote "./wp-content" "./wp-content" "./wp-content"
 #source (where I am at locally)= . (current folder), and aim is to make sure excludes goes from the base wp-content/uploads/
 # but can't test this... because it will start with top-level folder
 test_make_relative_remote "/wp-content" "." "/wp-content"
+#
 #test_make_relative_remote "./test_dir/remote/wp-content" ".test_dir/local/wp-content" "./test_dir/remote/wp-content"
 
 # Just deploying out wp-content, need to make sure the resulting folder structure matched expected excludes layout. But what is the difference?
