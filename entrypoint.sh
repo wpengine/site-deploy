@@ -106,6 +106,10 @@ check_cache() {
   fi
 }
 
+check_folder() {
+  make_relative_remote "$SRC_PATH" "$REMOTE_PATH"
+}
+
 sync_files() {
   #create multiplex connection 
   ssh -nNf -v -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlMaster=yes -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST"
@@ -146,4 +150,5 @@ setup_env
 setup_ssh_dir
 check_lint
 check_cache
+check_folder
 sync_files

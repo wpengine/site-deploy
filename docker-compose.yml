@@ -3,12 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: test
     image: wpengine/site-deploy:latest
     platform: linux/amd64
     entrypoint: /tests/test-make-relative-remote/test.sh
+    #connects local directory to container directory
     volumes:
       - ./tests/workspace:/workspace
+      - ./tests:/tests
     depends_on:
       - build
 
@@ -17,5 +18,4 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: build
     command: /bin/true

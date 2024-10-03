@@ -33,29 +33,22 @@ make_relative_remote() {
     return
   fi
 
-  # Not sure if this check is necessary
   if [[ "$SRC_PATH" == "$REMOTE_PATH" ]]; then
-      echo "SRC_PATH and REMOTE_PATH are the same, no moving relative paths needed 👋"
-      return
+    echo "SRC_PATH and REMOTE_PATH are the same, no moving relative paths needed 👋"
+    return
   fi
 
-    # Echo the paths for debugging
-    echo "SRC_PATH: $SRC_PATH"
-    echo "REMOTE_PATH: $REMOTE_PATH"
-    echo "Would have moved contents of SRC_PATH to REMOTE_PATH"
-  
-    if [ "$SRC_PATH" == "." ]; then
-        # Use a temporary directory to avoid moving REMOTE_PATH into itself
-        TMP_DIR=$(mktemp -d)
-        ls -la "$SRC_PATH"
-        mv "$SRC_PATH"/* "$TMP_DIR"
-        mkdir -p "$REMOTE_PATH"
-        mv "$TMP_DIR"/* "$REMOTE_PATH"
-        rmdir "$TMP_DIR"
-    else
-        mkdir -p "$REMOTE_PATH"
-        mv "$SRC_PATH"/* "$REMOTE_PATH"
-    fi
+  if [ "$SRC_PATH" == "." ]; then
+    # Use a temporary directory to avoid moving REMOTE_PATH into itself
+    TMP_DIR=$(mktemp -d) 
+    mv "$SRC_PATH"/* "$TMP_DIR"
+    mkdir -p "$REMOTE_PATH"
+    mv "$TMP_DIR"/* "$REMOTE_PATH"
+    rmdir "$TMP_DIR"
+  else
+    mkdir -p "$REMOTE_PATH"
+    mv "$SRC_PATH"/* "$REMOTE_PATH"
+  fi
 }
 
 
