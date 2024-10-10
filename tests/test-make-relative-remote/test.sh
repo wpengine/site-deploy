@@ -29,12 +29,22 @@ test_make_relative_remote() {
   echo -e "${GREEN}REMOTE_PATH='$REMOTE_PATH' SRC_PATH='$SRC_PATH'${NC}" 
   make_relative_remote
 
-  # Only compare the expected directory structure if REMOTE_PATH is not empty
+  # Only compare the expected directory structure if REMOTE_PATH is not empty and REMOTE_PATH is not equal to SRC_PATH
   if [[ -n "$REMOTE_PATH" && "$REMOTE_PATH" != "$SRC_PATH" ]]; then
-      # Verify that REMOTE_PATH and its folders exist in /workspace
-    echo "Verifying that REMOTE_PATH and its folders exist in /workspace"
+    # Verify that REMOTE_PATH and its folders exist in /workspace
     if [ -d "/workspace/$REMOTE_PATH" ]; then
-        echo -e "${GREEN}REMOTE_PATH exists in /workspace"
+        echo -e "${GREEN}REMOTE_PATH exists in /workspace${NC}"
+        
+        # Compare the contents of the moved REMOTE_PATH to the corresponding files in the data directory
+        EXPECTED_PATH="${SCRIPT_DIR}/data/repository-${1}/$SRC_PATH"
+        diff -r "/workspace/$REMOTE_PATH" "$EXPECTED_PATH"
+        
+        # Check the result of the diff command
+        if [[ $? -ne 0 ]]; then
+            echo -e "${RED}Verification failed: expected structure does not match.${NC}"
+        else
+            echo -e "${GREEN}Verification passed: expected structure matches.${NC}"
+        fi
     else
         echo -e "${RED}Verification failed: REMOTE_PATH does not exist in /workspace.${NC}"
     fi
