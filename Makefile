@@ -22,5 +22,9 @@ version: build
 	docker image tag $(IMAGE) $(IMAGE_NAME):v$(MAJOR_VERSION).$(MINOR_VERSION) && \
 	docker image tag $(IMAGE) $(IMAGE_NAME):v$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
 
-test:
+test-unit:
 	./tests/test_functions.sh
+	
+test-integration:
+	@echo 🧪 Executing Relative Remote Tests...
+	docker compose up test
