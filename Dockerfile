@@ -11,3 +11,4 @@ ADD functions.sh /functions.sh
 ADD entrypoint.sh /entrypoint.sh
 ADD exclude.txt /exclude.txt
 ENTRYPOINT ["/entrypoint.sh"]
+
