@@ -22,5 +22,11 @@ version: build
 	docker image tag $(IMAGE) $(IMAGE_NAME):v$(MAJOR_VERSION).$(MINOR_VERSION) && \
 	docker image tag $(IMAGE) $(IMAGE_NAME):v$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
 
-test:
+test-unit:
 	./tests/test_functions.sh
+	
+test-integration:
+	# TODO: Currently commenting out the integration tests as they are not ready yet
+	# this was setup for the relative remote work, and is not currently working with 
+	# testing sync_files function.
+	# docker compose up test
