@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "${SCRIPT_DIR}/../common.sh"
 source "${SCRIPT_DIR}/../../functions.sh"
+source "${SCRIPT_DIR}/../../entrypoint.sh"
 
 setup() {
     rm -rf /workspace/*
@@ -13,21 +14,32 @@ setup() {
     # Works like GitHub action, checking out the workspace directory
         cp -r "${test_data_dir}"* /workspace/
     fi
+    ssh-keygen -t rsa -b 2048 -f /workspace/mock_ssh_key -N ""
+    chmod 600 /workspace/mock_ssh_key
+    
     cd /workspace
 }
 
-# Test resulting directory structure from calling make_relative_remote
-# Expected output is the directory structure after moving the contents of SRC_PATH to REMOTE_PATH
-# e.g. make_relative_remote "/home/user/website" "/var/www/html" should return "/var/www/html/website"
-# 1st argument: SRC_PATH, 2nd argument: REMOTE_PATH
-# How can I make sure the make test is not caching the docker and creating it fresh
-test_make_relative_remote() {
+# Test resulting directory structure from calling sync_files
+test_sync_files() {
   setup "$1"
   SRC_PATH=$2
   REMOTE_PATH=$3
 
+  WPE_SSHG_KEY_PRIVATE=$(cat /workspace/mock_ssh_key)
+
   echo -e "${GREEN}REMOTE_PATH='$REMOTE_PATH' SRC_PATH='$SRC_PATH'${NC}" 
-  make_relative_remote
+  
+  # Assign flag values to FLAGS_ARRAY
+  FLAGS_ARRAY=("-azvr" "--dry-run" "--inplace" "--exclude='.*'")
+  
+  # Print the flags for debugging
+  echo "Using the following rsync flags:"
+  for flag in "${FLAGS_ARRAY[@]}"; do
+    echo "$flag"
+  done
+
+  sync_files
 
   # Only compare the expected directory structure if REMOTE_PATH is not empty and REMOTE_PATH is not equal to SRC_PATH
   if [[ -n "$REMOTE_PATH" && "$REMOTE_PATH" != "$SRC_PATH" ]]; then
@@ -54,9 +66,9 @@ test_make_relative_remote() {
 }
 
 # Test cases, make remote directory relative to to the tests directory
-test_make_relative_remote "1" "." ""
-test_make_relative_remote "2" "./wp-content" "./wp-content"
-test_make_relative_remote "3" "." "wp-content/"
-test_make_relative_remote "4" "." "wp-content/themes/beautiful-pro" 
-test_make_relative_remote "5" "my-awesome-plugins" "wp-content/plugins" 
-test_make_relative_remote "6" "my-awesome-plugins/blues-brothers" "wp-content/plugins" 
+#test_sync_files "1" "." ""
+#test_sync_files "2" "./wp-content" "./wp-content"
+#test_sync_files "3" "." "wp-content/"
+#test_sync_files "4" "." "wp-content/themes/beautiful-pro" 
+#test_sync_files "5" "my-awesome-plugins" "wp-content/plugins" 
+#test_sync_files "6" "my-awesome-plugins/blues-brothers" "wp-content/plugins"

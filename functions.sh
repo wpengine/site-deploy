@@ -25,31 +25,3 @@ print_deployment_info() {
     echo -e "\t$flag"
   done
 }
-
-# Function to check REMOTE_PATH and move contents of SRC_PATH
-make_relative_remote() {
-  if [[ -z "$REMOTE_PATH" && "$SRC_PATH" == "." ]]; then
-    echo "Default usage, no moving relative paths needed 👋"
-    return
-  fi
-
-  if [[ "$SRC_PATH" == "$REMOTE_PATH" ]]; then
-    echo "SRC_PATH and REMOTE_PATH are the same, no moving relative paths needed 👋"
-    return
-  fi
-
-  if [ "$SRC_PATH" == "." ]; then
-    # Use a temporary directory to avoid moving REMOTE_PATH into itself
-    TMP_DIR=$(mktemp -d) 
-    mv "$SRC_PATH"/* "$TMP_DIR"
-    mkdir -p "$REMOTE_PATH"
-    mv "$TMP_DIR"/* "$REMOTE_PATH"
-    rmdir "$TMP_DIR"
-  else
-    mkdir -p "$REMOTE_PATH"
-    mv "$SRC_PATH"/* "$REMOTE_PATH"
-  fi
-}
-
-
-
