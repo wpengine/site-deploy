@@ -5,8 +5,9 @@ set -e
 # Get the directory of the current script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Source the functions.sh file relative to the current script's location
+# Source the functions.sh and exclude-from.sh files relative to the current script's location
 source "${SCRIPT_DIR}/functions.sh"
+source "${SCRIPT_DIR}/exclude-from.sh"
 
 validate() {
   # mandatory params
@@ -107,14 +108,17 @@ check_cache() {
 }
 
 sync_files() {
+  # Generate the excludes list before using the output with rsync
+  local exclude_from; exclude_from="$(generate_exclude_from)"
+
   #create multiplex connection 
   ssh -nNf -v -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlMaster=yes -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST"
   echo "!!! MULTIPLEX SSH CONNECTION ESTABLISHED !!!"
 
   set -x
-  rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${FLAGS_ARRAY[@]}" --exclude-from='/exclude.txt' --chmod=D775,F664 "${SRC_PATH}" "${WPE_DESTINATION}"
+  rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${FLAGS_ARRAY[@]}" --exclude-from=<( { { set +x; } 2>/dev/null; echo "$exclude_from"; } ) --chmod=D775,F664 "${SRC_PATH}" "${WPE_DESTINATION}"
   set +x
-  
+
   if [[ -n ${SCRIPT} || -n ${CACHE_CLEAR} ]]; then
 
       if [[ -n ${SCRIPT} ]]; then

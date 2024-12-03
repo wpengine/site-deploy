@@ -24,3 +24,4 @@ version: build
 
 test:
 	./tests/test_functions.sh
+	./tests/test_exclude_from.sh
