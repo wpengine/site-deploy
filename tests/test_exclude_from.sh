@@ -100,6 +100,37 @@ test_determine_exclude_paths() {
   fi
 }
 
-# Run the tests
-test_generate_exclude_from
-test_determine_exclude_paths
+test_rsync_with_excludes() {
+  export REMOTE_PATH=$1
+  echo -e "${BLUE}--- REMOTE_PATH: '$REMOTE_PATH'${NC}"
+
+  local exclude_from; exclude_from="$(generate_exclude_from)"
+  local fixture_path="$SCRIPT_DIR/data"
+
+  # Capture the output of the rsync command
+  output=$(rsync --dry-run --verbose --recursive --exclude-from=<(echo "$exclude_from") "$fixture_path" .)
+
+  # Check if the output contains the expected file
+  if echo "$output" | grep -q "test-plugin.php"; then
+    echo -e "${GREEN}Test passed for rsync syncing files: test-plugin.php included.${NC}"
+  else
+    echo -e "${RED}Test failed for rsync syncing files: test-plugin.php excluded.${NC}"
+  fi
+
+  # Check that the output does not contain the excluded file
+  if echo "$output" | grep -q "mu-plugin.php"; then
+    echo -e "${RED}Test failed for rsync parsing excludes: mu-plugin.php included.${NC}"
+  else
+    echo -e "${GREEN}Test passed for rsync parsing excludes: mu-plugin.php excluded.${NC}"
+  fi
+}
+
+main() {
+  test_generate_exclude_from
+  test_determine_exclude_paths
+  test_rsync_with_excludes ""
+  test_rsync_with_excludes "wp-content"
+  test_rsync_with_excludes "wp-content/mu-plugins"
+}
+
+main

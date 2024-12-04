@@ -18,9 +18,10 @@ set -x
 
 FLAGS="-avzr --filter=':- .gitignore' --exclude='.*'"
 FLAGS_ARRAY=("-avzr" "--filter=:- .gitignore" "--exclude='.*'")
+FIXTURE_PATH="$SCRIPT_DIR/data/wp-content"
 
 test_flags_no_quotes() {
-  rsync $FLAGS --dry-run "$SCRIPT_DIR"/data . > /dev/null
+  rsync $FLAGS --dry-run "$FIXTURE_PATH" . > /dev/null
   if [ $? -eq 0 ]; then
     echo -e "${GREEN}test_flags_no_quotes: Success${NC}"
   else
@@ -29,7 +30,7 @@ test_flags_no_quotes() {
 }
 
 test_flags_double_quotes() {
-  rsync "$FLAGS" --dry-run "$SCRIPT_DIR"/data . > /dev/null
+  rsync "$FLAGS" --dry-run "$FIXTURE_PATH" . > /dev/null
   if [ $? -eq 0 ]; then
     echo -e "${GREEN}test_flags_double_quotes: Success${NC}"
   else
@@ -38,7 +39,7 @@ test_flags_double_quotes() {
 }
 
 test_flags_array() {
-  rsync "${FLAGS_ARRAY[@]}" --dry-run "$SCRIPT_DIR"/data . > /dev/null
+  rsync "${FLAGS_ARRAY[@]}" --dry-run "$FIXTURE_PATH" . > /dev/null
   if [ $? -eq 0 ]; then
     echo -e "${GREEN}test_flags_array: Success${NC}"
   else
