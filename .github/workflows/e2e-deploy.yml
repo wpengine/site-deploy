@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Bump test plugin version number
-        run: sed -i 's/0.0.1/0.0.2/' tests/data/plugins/test-plugin/test-plugin.php
+        run: sed -i 's/0.0.1/0.0.2/' tests/data/wp-content/plugins/test-plugin/test-plugin.php
       - name: Deploy to WP Engine
         uses: ./.github/actions/deploy
         with:
@@ -27,7 +27,7 @@ jobs:
           WPE_SSHG_KEY_PRIVATE: ${{ secrets.WPE_SSHG_KEY_PRIVATE }}
           WPE_ENV: sitedeploye2e
           # Deploy Options
-          SRC_PATH: "tests/data/plugins/test-plugin"
+          SRC_PATH: "tests/data/wp-content/plugins/test-plugin"
           REMOTE_PATH: "wp-content/plugins/"
           PHP_LINT: true
           FLAGS: '-r --backup --backup-dir=/tmp --itemize-changes'

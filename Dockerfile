@@ -8,6 +8,6 @@ RUN apk update \
  && rm -rf /var/cache/apk/*
 # Add entrypoint and excludes
 ADD functions.sh /functions.sh
+ADD exclude-from.sh /exclude-from.sh
 ADD entrypoint.sh /entrypoint.sh
-ADD exclude.txt /exclude.txt
 ENTRYPOINT ["/entrypoint.sh"]
