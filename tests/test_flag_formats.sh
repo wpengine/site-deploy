@@ -18,7 +18,7 @@ set -x
 
 FLAGS="-avzr --filter=':- .gitignore' --exclude='.*'"
 FLAGS_ARRAY=("-avzr" "--filter=:- .gitignore" "--exclude='.*'")
-FIXTURE_PATH="$SCRIPT_DIR/data/wp-content"
+FIXTURE_PATH="$SCRIPT_DIR/data"
 
 test_flags_no_quotes() {
   rsync $FLAGS --dry-run "$FIXTURE_PATH" . > /dev/null

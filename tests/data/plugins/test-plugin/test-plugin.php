@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Deploy WordPress to WP Engine - e2e Test - Plugin Fixture
+ * Plugin Name: Deploy WordPress to WP Engine - e2e Test
  * Plugin URI: https://github.com/wpengine/site-deploy
  * Description: Sample code to test the wpengine/site-deploy image.
  * Version: 0.0.1

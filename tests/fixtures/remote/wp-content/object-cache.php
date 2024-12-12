@@ -1,8 +1,7 @@
   <?php
   /**
-   * Plugin Name: Deploy WordPress to WP Engine - MU-Plugin Fixture
+   * Plugin Name: Object Cache Fixture (excluded by exclude-from.sh)
    * Plugin URI: https://github.com/wpengine/site-deploy
-   * Description: Sample code to test the wpengine/site-deploy image.
    * Version: 0.0.1
    */
 
