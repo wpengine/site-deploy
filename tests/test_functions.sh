@@ -3,8 +3,8 @@
 # Get the directory of the current script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "${SCRIPT_DIR}/common.sh"
-source "${SCRIPT_DIR}/../functions.sh"
+source "${SCRIPT_DIR}/helpers/common.sh"
+source "${SCRIPT_DIR}/../utils/functions.sh"
 
 # First argument represents the value of the FLAGS variable.
 # The rest of the arguments represent the expected values of the FLAGS_ARRAY.
