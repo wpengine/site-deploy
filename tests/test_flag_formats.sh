@@ -12,7 +12,7 @@
 # Get the directory of the current script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "${SCRIPT_DIR}/utils/common.sh"
+source "${SCRIPT_DIR}/helpers/common.sh"
 
 set -x
 
