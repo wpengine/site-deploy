@@ -1,0 +1,10 @@
+FROM instrumentisto/rsync-ssh:alpine3.20
+
+RUN apk add --no-cache bash
+
+COPY ../../utils/* /tests/helpers/* /
+COPY /tests/test_generate_path_excludes.sh /test_generate_path_excludes.sh
+
+RUN chmod +x /test_generate_path_excludes.sh
+
+ENTRYPOINT ["/test_generate_path_excludes.sh"]
