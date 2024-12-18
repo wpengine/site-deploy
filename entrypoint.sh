@@ -5,8 +5,9 @@ set -e
 # Get the directory of the current script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Source the functions.sh file relative to the current script's location
-source "${SCRIPT_DIR}/functions.sh"
+# Source the functions.sh and exclude_from.sh files relative to the current script's location
+source "${SCRIPT_DIR}/utils/functions.sh"
+source "${SCRIPT_DIR}/utils/generate_path_excludes.sh"
 
 validate() {
   # mandatory params
@@ -27,7 +28,7 @@ setup_env() {
       WPE_ENV_NAME="${PRD_ENV}";
     elif [[ -n ${STG_ENV} ]]; then
       WPE_ENV_NAME="${STG_ENV}";
-    elif [[ -n ${DEV_ENV} ]]; then  
+    elif [[ -n ${DEV_ENV} ]]; then
       WPE_ENV_NAME="${DEV_ENV}";
     else echo "Failure: Missing environment variable..."  && exit 1;
   fi
@@ -54,18 +55,18 @@ setup_env() {
 setup_ssh_dir() {
   echo "setup ssh path"
 
-  if [ ! -d "${HOME}/.ssh" ]; then 
-      mkdir "${HOME}/.ssh" 
-      SSH_PATH="${HOME}/.ssh" 
+  if [ ! -d "${HOME}/.ssh" ]; then
+      mkdir "${HOME}/.ssh"
+      SSH_PATH="${HOME}/.ssh"
       mkdir "${SSH_PATH}/ctl/"
-      # Set Key Perms 
+      # Set Key Perms
       chmod -R 700 "$SSH_PATH"
-    else 
+    else
       SSH_PATH="${HOME}/.ssh"
       echo "using established SSH KEY path...";
   fi
 
-  #Copy secret keys to container 
+  #Copy secret keys to container
   WPE_SSHG_KEY_PRIVATE_PATH="${SSH_PATH}/wpe_id_rsa"
 
   if [ "${CICD_VENDOR}" == "wpe_bb" ]; then
@@ -75,7 +76,7 @@ setup_ssh_dir() {
   fi
 
   chmod 600 "${WPE_SSHG_KEY_PRIVATE_PATH}"
-  #establish knownhosts 
+  #establish knownhosts
   KNOWN_HOSTS_PATH="${SSH_PATH}/known_hosts"
   ssh-keyscan -t rsa "${WPE_SSH_HOST}" >> "${KNOWN_HOSTS_PATH}"
   chmod 644 "${KNOWN_HOSTS_PATH}"
@@ -92,7 +93,7 @@ check_lint() {
           fi
       done
       echo "PHP Lint Successful! No errors detected!"
-  else 
+  else
       echo "Skipping PHP Linting."
   fi
 }
@@ -107,14 +108,20 @@ check_cache() {
 }
 
 sync_files() {
+  # Generate the excludes list before using the output with rsync
+  local source_exclude_from; source_exclude_from="$(generate_source_exclude_from)"
+  local remote_excludes; remote_excludes="$(generate_remote_excludes)"
+
   #create multiplex connection 
   ssh -nNf -v -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlMaster=yes -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST"
   echo "!!! MULTIPLEX SSH CONNECTION ESTABLISHED !!!"
 
   set -x
-  rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${FLAGS_ARRAY[@]}" --exclude-from='/exclude.txt' --chmod=D775,F664 "${SRC_PATH}" "${WPE_DESTINATION}"
+  rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" "${FLAGS_ARRAY[@]}" \
+        --exclude-from=<( { { set +x; } 2>/dev/null; echo "$source_exclude_from"; } ) --rsync-path="rsync $remote_excludes" \
+        --chmod=D775,F664 "${SRC_PATH}" "${WPE_DESTINATION}"
   set +x
-  
+
   if [[ -n ${SCRIPT} || -n ${CACHE_CLEAR} ]]; then
 
       if [[ -n ${SCRIPT} ]]; then

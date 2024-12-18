@@ -1,13 +1,12 @@
 FROM instrumentisto/rsync-ssh:alpine3.20
-# Intsall dependencies
+# Install dependencies
 RUN apk update \
  && apk upgrade \
  && apk add --no-cache \
             bash \
             php \
  && rm -rf /var/cache/apk/*
-# Add entrypoint and excludes
-ADD functions.sh /functions.sh
+# Add entrypoint and utils
+COPY utils /utils
 ADD entrypoint.sh /entrypoint.sh
-ADD exclude.txt /exclude.txt
 ENTRYPOINT ["/entrypoint.sh"]
