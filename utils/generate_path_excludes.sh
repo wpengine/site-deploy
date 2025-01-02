@@ -31,20 +31,11 @@ shopt -s extglob
 #     (such as some of the WP Engine managed plugins) might be useful in rare
 #     circumstances to have as a reference for debugging purposes.
 
-# Get the directory of the current script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Source the print_mount_paths.sh file relative to the current script's location
-source "${SCRIPT_DIR}/print_mount_paths.sh"
-
-# Determine the source paths to exclude from the deployment
 determine_source_exclude_paths() {
   local base_path
   local mu_dir_path
 
-  read -r mounted_source_path _ <<< "$(print_mount_paths "wp-content")"
-
-  if [[ -n "${SRC_PATH}" && "${SRC_PATH}" != '.' ]]; then
+  parse_src_path() {
     case "${SRC_PATH}" in
       wp-content )
         base_path="/wp-content/"
@@ -58,25 +49,40 @@ determine_source_exclude_paths() {
         mu_dir_path="/"
         ;;
     esac
-  elif [[ "$(pwd)" != *wp-content* && "${mounted_source_path}" != *wp-content* ]]; then
-    base_path="/wp-content/"
-    mu_dir_path="/wp-content/mu-plugins/"
+  }
+
+  parse_current_path() {
+    case "$(pwd)" in
+      *wp-content )
+        base_path="/"
+        mu_dir_path="/mu-plugins/"
+        ;;
+      *mu-plugins )
+        mu_dir_path="/"
+        ;;
+    esac
+  }
+
+  glob_current_dir() {
+    if [[ -d wp-content ]]; then
+      base_path="/wp-content/"
+      mu_dir_path="/wp-content/mu-plugins/"
+    elif [[ -d mu-plugins ]]; then
+      base_path="/"
+      mu_dir_path="/mu-plugins/"
+    elif [[ -d wpengine-common ]]; then
+      mu_dir_path="/"
+    fi
+  }
+
+  # If SRC_PATH is set, use it to determine base and mu-plugins paths.
+  # Otherwise, use the current directory or check its contents to set the paths.
+  if [[ -n "${SRC_PATH}" && "${SRC_PATH}" != '.' ]]; then
+    parse_src_path
+  elif [[ "$(pwd)" == *wp-content* ]]; then
+    parse_current_path
   else
-    # Iterate over the possible paths and break when a match is found
-    # !!! Ordering is important for the switch cases !!!
-    for value in "$(pwd)" "$mounted_source_path"; do
-      case "$value" in
-        *wp-content )
-          base_path="/"
-          mu_dir_path="/mu-plugins/"
-          break
-          ;;
-        *mu-plugins )
-          mu_dir_path="/"
-          break
-          ;;
-      esac
-    done
+    glob_current_dir
   fi
 
   printf "%s\n%s\n" "$base_path" "$mu_dir_path"
@@ -86,10 +92,7 @@ determine_remote_exclude_paths() {
   local base_path
   local mu_dir_path
 
-  if [[ -z "${REMOTE_PATH}" ]]; then
-    base_path="/wp-content/"
-    mu_dir_path="/wp-content/mu-plugins/"
-  else
+  parse_remote_path() {
     case "$REMOTE_PATH" in
       wp-content?(/) )
         base_path="/"
@@ -99,12 +102,19 @@ determine_remote_exclude_paths() {
         mu_dir_path="/"
         ;;
     esac
+  }
+
+  if [[ -z "${REMOTE_PATH}" ]]; then
+    base_path="/wp-content/"
+    mu_dir_path="/wp-content/mu-plugins/"
+  else
+    parse_remote_path
   fi
 
   printf "%s\n%s\n" "$base_path" "$mu_dir_path"
 }
 
-# Generate the dynamic list of files to exclude from the deployment
+# Generate the dynamic list of paths to exclude from the deployment
 print_dynamic_excludes() {
   local func=$1
   local delimiter=$2
