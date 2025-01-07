@@ -5,7 +5,7 @@ shopt -s extglob
 
 # Dynamic Excludes
 #
-# This script generates two lists of files to exclude; one for the source, and one for the remote.
+# This script generates a list of files to exclude from the rsync deployment.
 #
 # Notes about excluded files:
 #
@@ -31,84 +31,37 @@ shopt -s extglob
 #     (such as some of the WP Engine managed plugins) might be useful in rare
 #     circumstances to have as a reference for debugging purposes.
 
-determine_source_exclude_paths() {
-  local base_path
-  local mu_dir_path
+determine_exclude_paths() {
+  local base_path; base_path="/wp-content/"
+  local mu_dir_path; mu_dir_path="/wp-content/mu-plugins/"
 
-  parse_src_path() {
-    case "${SRC_PATH}" in
-      wp-content )
-        base_path="/wp-content/"
-        mu_dir_path="/wp-content/mu-plugins/"
-        ;;
-      wp-content/ | *mu-plugins )
-        base_path="/"
-        mu_dir_path="/mu-plugins/"
-        ;;
-      *mu-plugins/ )
-        mu_dir_path="/"
-        ;;
-    esac
+  remote_path_is_set() {
+    [[ -n "${REMOTE_PATH}" && "${REMOTE_PATH}" != '.' ]]
   }
 
-  parse_current_path() {
-    case "$(pwd)" in
-      *wp-content )
-        base_path="/"
-        mu_dir_path="/mu-plugins/"
-        ;;
-      *mu-plugins )
-        mu_dir_path="/"
-        ;;
-    esac
-  }
-
-  glob_current_dir() {
-    if [[ -d wp-content ]]; then
-      base_path="/wp-content/"
-      mu_dir_path="/wp-content/mu-plugins/"
-    elif [[ -d mu-plugins ]]; then
-      base_path="/"
-      mu_dir_path="/mu-plugins/"
-    elif [[ -d wpengine-common ]]; then
-      mu_dir_path="/"
-    fi
-  }
-
-  # If SRC_PATH is set, use it to determine base and mu-plugins paths.
-  # Otherwise, use the current directory or check its contents to set the paths.
-  if [[ -n "${SRC_PATH}" && "${SRC_PATH}" != '.' ]]; then
-    parse_src_path
-  elif [[ "$(pwd)" == *wp-content* ]]; then
-    parse_current_path
-  else
-    glob_current_dir
-  fi
-
-  printf "%s\n%s\n" "$base_path" "$mu_dir_path"
-}
-
-determine_remote_exclude_paths() {
-  local base_path
-  local mu_dir_path
-
-  parse_remote_path() {
-    case "$REMOTE_PATH" in
+  make_exclude_paths_relative_to_remote() {
+    case "${REMOTE_PATH}" in
       wp-content?(/) )
+        # REMOTE_PATH is the wp-content directory
         base_path="/"
         mu_dir_path="/mu-plugins/"
         ;;
       wp-content/mu-plugins?(/) )
+        # REMOTE_PATH is the mu-plugins directory
+        base_path=""
         mu_dir_path="/"
+        ;;
+      * )
+        # REMOTE_PATH is set, but it's not the site root, wp-content, or mu-plugins.
+        # No dynamic excludes needed.
+        base_path=""
+        mu_dir_path=""
         ;;
     esac
   }
 
-  if [[ -z "${REMOTE_PATH}" ]]; then
-    base_path="/wp-content/"
-    mu_dir_path="/wp-content/mu-plugins/"
-  else
-    parse_remote_path
+  if remote_path_is_set; then
+    make_exclude_paths_relative_to_remote
   fi
 
   printf "%s\n%s\n" "$base_path" "$mu_dir_path"
@@ -175,8 +128,8 @@ print_dynamic_excludes() {
   echo -e "$output"
 }
 
-generate_source_exclude_from() {
-  local dynamic_excludes; dynamic_excludes=$(print_dynamic_excludes determine_source_exclude_paths "\n")
+generate_exclude_from() {
+  local dynamic_excludes; dynamic_excludes=$(print_dynamic_excludes determine_exclude_paths "\n")
 
   cat << EOF
 # Version Control
@@ -191,23 +144,6 @@ generate_source_exclude_from() {
 *.swp
 Thumbs.db
 
-# WordPress specific files
-wp-config.php
-
-# WP Engine specific files and directories
-.smushit-status
-.gitattributes
-.wpe-devkit/
-.wpengine-conf/
-_wpeprivate
-$(echo -e "$dynamic_excludes")
-EOF
-}
-
-generate_remote_excludes() {
-  local dynamic_excludes; dynamic_excludes=$(print_dynamic_excludes determine_remote_exclude_paths "\n")
-
-  cat << EOF | grep -Ev '^\s*(#|$)|\s+#' | awk '{printf "--exclude='\''%s'\'' ", $0}' | sed 's/[[:space:]]*$//'
 # WordPress specific files
 wp-config.php
 
