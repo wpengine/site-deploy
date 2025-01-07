@@ -38,21 +38,33 @@ test_determine_exclude_paths() {
 }
 
 test_generate_exclude_from() {
-  export REMOTE_PATH=""
-  local output
-  local expected_output
+  run_test_generate_exclude_from() {
+    export REMOTE_PATH=$1
+    local output
+    local expected_output_file=$2
+    local expected_output
 
-  output=$(generate_exclude_from)
-  expected_output=$(cat "tests/fixtures/excludes/exclude_from.txt")
+    output=$(generate_exclude_from)
+    expected_output=$(cat "${expected_output_file}")
 
-  if [[ "$output" != "$expected_output" ]]; then
-    echo -e "${RED}Test failed': generated output does not match expected output.${NC}"
-    echo -e "${BLUE}Generated output:${NC}"
-    echo "$output"
-    echo -e "${BLUE}Expected output:${NC}"
-    echo "$expected_output"
-    exit 1
-  fi
+    if [[ "$output" != "$expected_output" ]]; then
+      echo -e "${RED}Test failed for REMOTE_PATH='${REMOTE_PATH}'': generated output does not match expected output.${NC}"
+      echo -e "${BLUE}Generated output:${NC}"
+      echo "$output"
+      echo -e "${BLUE}Expected output from ${expected_output_file}:${NC}"
+      echo "$expected_output"
+      exit 1
+    fi
+  }
+  
+  run_test_generate_exclude_from "."                      "tests/fixtures/excludes/exclude_from_root.txt"
+  run_test_generate_exclude_from ""                       "tests/fixtures/excludes/exclude_from_root.txt"
+  run_test_generate_exclude_from "wp-content"             "tests/fixtures/excludes/exclude_from_wp_content.txt"
+  run_test_generate_exclude_from "wp-content/"            "tests/fixtures/excludes/exclude_from_wp_content.txt"
+  run_test_generate_exclude_from "wp-content/mu-plugins"  "tests/fixtures/excludes/exclude_from_mu_plugins.txt"
+  run_test_generate_exclude_from "wp-content/mu-plugins/" "tests/fixtures/excludes/exclude_from_mu_plugins.txt"
+  run_test_generate_exclude_from "wp-content/plugins"     "tests/fixtures/excludes/exclude_from_safe_directories.txt"
+  run_test_generate_exclude_from "wp-content/plugins/"    "tests/fixtures/excludes/exclude_from_safe_directories.txt"
 
   echo -e "${GREEN}Test passed for generating exclude-from rules: generated output matches expected output.${NC}"
 }
