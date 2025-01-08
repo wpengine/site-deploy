@@ -66,7 +66,7 @@ test_generate_exclude_from() {
   run_test_generate_exclude_from "wp-content/plugins"     "tests/fixtures/excludes/exclude_from_safe_directories.txt"
   run_test_generate_exclude_from "wp-content/plugins/"    "tests/fixtures/excludes/exclude_from_safe_directories.txt"
 
-  echo -e "${GREEN}Test passed for generating exclude-from rules: generated output matches expected output.${NC}"
+  echo -e "${GREEN}All tests passed for generating exclude-from rules.${NC}"
 }
 
 main() {
