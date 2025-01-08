@@ -1,5 +1,11 @@
 # @wpengine/site-deploy
 
+## 1.0.5
+
+### Patch Changes
+
+- 54ec5ce: Fixes a bug when deploying to dirs other than site root by dynamically generating file exclusion lists on the fly
+
 ## 1.0.4
 
 ### Patch Changes
