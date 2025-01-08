@@ -1,0 +1,21 @@
+# Version Control
+*~
+.git
+.github
+.gitignore
+.DS_Store
+.svn
+.cvs
+*.bak
+*.swp
+Thumbs.db
+
+# WordPress specific files
+wp-config.php
+
+# WP Engine specific files and directories
+.smushit-status
+.gitattributes
+.wpe-devkit/
+.wpengine-conf/
+_wpeprivate

@@ -1,0 +1,48 @@
+# Version Control
+*~
+.git
+.github
+.gitignore
+.DS_Store
+.svn
+.cvs
+*.bak
+*.swp
+Thumbs.db
+
+# WordPress specific files
+wp-config.php
+
+# WP Engine specific files and directories
+.smushit-status
+.gitattributes
+.wpe-devkit/
+.wpengine-conf/
+_wpeprivate
+
+### Dynamic file and directory exclusions
+/uploads/
+/blogs.dir/
+/upgrade/*
+/backup-db/*
+/advanced-cache.php
+/wp-cache-config.php
+/cache/*
+/cache/supercache/*
+/object-cache.php
+/drop-ins/
+/drop-ins/wp-cache-memcached*
+/mysql.sql
+
+### Dynamic mu-plugin file and directory exclusions
+/mu-plugins/mu-plugin.php
+/mu-plugins/slt-force-strong-passwords.php
+/mu-plugins/wpengine-security-auditor.php
+/mu-plugins/stop-long-comments.php
+/mu-plugins/force-strong-passwords*
+/mu-plugins/wpengine-common*
+/mu-plugins/wpe-wp-sign-on-plugin*
+/mu-plugins/wpe-elasticpress-autosuggest-logger*
+/mu-plugins/wpe-cache-plugin*
+/mu-plugins/wp-cache-memcached*
+/mu-plugins/local-by-flywheel-live-link-helper.php
