@@ -1,5 +1,11 @@
 # @wpengine/site-deploy
 
+## 1.0.6
+
+### Patch Changes
+
+- e140bae: Adds wpe-update-source-selector to default excludes list
+
 ## 1.0.5
 
 ### Patch Changes
