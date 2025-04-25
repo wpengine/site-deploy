@@ -45,4 +45,5 @@ _wpeprivate
 /mu-plugins/wpe-elasticpress-autosuggest-logger*
 /mu-plugins/wpe-cache-plugin*
 /mu-plugins/wp-cache-memcached*
+/mu-plugins/wpe-update-source-selector*
 /mu-plugins/local-by-flywheel-live-link-helper.php

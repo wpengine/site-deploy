@@ -107,6 +107,7 @@ print_dynamic_excludes() {
     wpe-elasticpress-autosuggest-logger*
     wpe-cache-plugin*
     wp-cache-memcached*
+    wpe-update-source-selector*
     # Local specific files
     local-by-flywheel-live-link-helper.php
   )
