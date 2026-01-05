@@ -38,15 +38,35 @@ Any other customizations that are uniquely required can be added to the Dockerfi
 
 ## Updating the Docker Image
 
-The `latest` Docker Image will be updated automatically after merging into the `main` branch.
-`wpengine/site-deploy:latest`
+### Automatic Builds
 
+Docker images are built and pushed automatically:
 
-A versioned Docker Image will be automatically generated for each release of this repository, based on the tag name
-`wpengine/site-deploy:{tagName}`
+| Trigger | Tags Updated | Source |
+|---------|--------------|--------|
+| Push to `main` | `latest` | Docker Hub Autobuild |
+| New version release | `latest`, `vX`, `vX.Y`, `vX.Y.Z` | Docker Hub Autobuild |
+| Monthly schedule (1st of month) | `latest`, `vX`, `vX.Y`, `vX.Y.Z` | GitHub Actions |
 
-Additional Docker Images will be automatically generated for each branch to use in testing.
-`wpengine/site-deploy:branch-{branchName}`
+The scheduled monthly rebuild ensures security patches are applied even when there are no new releases. This workflow uses `no-cache` to pull fresh base image layers.
+
+### Base Image Maintenance
+
+The Dockerfile uses Alpine Linux as its base image. The base image follows this update pattern:
+
+- **Dependabot** monitors for new Alpine versions and creates PRs automatically
+- **Scheduled rebuilds** pick up security patches from `apk upgrade` monthly
+- Alpine releases new versions every 6 months (roughly June and December)
+
+When Dependabot opens a PR for a new Alpine version:
+
+1. Review the [Alpine release notes](https://alpinelinux.org/releases/) for breaking changes
+2. Add a changeset to the PR (`npx changeset`) so a proper release is created when merged
+3. Merge the PR to trigger a new versioned release
+
+### Docker Hub
+
+Images are published to DockerHub: [wpengine/site-deploy](https://hub.docker.com/r/wpengine/site-deploy)
 
 ## Manually updating the Docker Image
 

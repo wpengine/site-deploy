@@ -1,0 +1,55 @@
+name: Scheduled Docker Rebuild
+
+on:
+  schedule:
+    # Run monthly on the 1st at 00:00 UTC
+    - cron: '0 0 1 * *'
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  rebuild:
+    name: Rebuild Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current version
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+          PATCH=$(echo $VERSION | cut -d. -f3)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "MAJOR=$MAJOR" >> $GITHUB_OUTPUT
+          echo "MINOR=$MINOR" >> $GITHUB_OUTPUT
+          echo "PATCH=$PATCH" >> $GITHUB_OUTPUT
+
+      - name: Checkout release tag
+        run: git checkout v${{ steps.version.outputs.MAJOR }}.${{ steps.version.outputs.MINOR }}.${{ steps.version.outputs.PATCH }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            wpengine/site-deploy:latest
+            wpengine/site-deploy:${{ steps.version.outputs.MAJOR }}
+            wpengine/site-deploy:${{ steps.version.outputs.MAJOR }}.${{ steps.version.outputs.MINOR }}
+            wpengine/site-deploy:${{ steps.version.outputs.MAJOR }}.${{ steps.version.outputs.MINOR }}.${{ steps.version.outputs.PATCH }}
+          # No cache - we want fresh base image layers for security patches
+          no-cache: true
+

@@ -1,10 +1,15 @@
-FROM instrumentisto/rsync-ssh:alpine3.20
-# Install dependencies
+FROM alpine:3.20
+
 RUN apk update \
  && apk upgrade \
  && apk add --no-cache \
+            rsync \
+            openssh-client-default sshpass \
+            gettext-envsubst \
+            ca-certificates tzdata \
             bash \
             php \
+ && update-ca-certificates \
  && rm -rf /var/cache/apk/*
 # Add entrypoint and utils
 COPY utils /utils
