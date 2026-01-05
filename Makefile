@@ -15,12 +15,12 @@ list-images:
 	docker images $(IMAGE_NAME) -a
 
 build:
-	docker build --no-cache -t $(IMAGE) ./
+	docker build --platform linux/amd64 --no-cache -t $(IMAGE) ./
 
 version: build
-	docker image tag $(IMAGE) $(IMAGE_NAME):v$(MAJOR_VERSION) && \
-	docker image tag $(IMAGE) $(IMAGE_NAME):v$(MAJOR_VERSION).$(MINOR_VERSION) && \
-	docker image tag $(IMAGE) $(IMAGE_NAME):v$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
+	docker image tag $(IMAGE) $(IMAGE_NAME):$(MAJOR_VERSION) && \
+	docker image tag $(IMAGE) $(IMAGE_NAME):$(MAJOR_VERSION).$(MINOR_VERSION) && \
+	docker image tag $(IMAGE) $(IMAGE_NAME):$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
 
 test-unit:
 	./tests/test_functions.sh
