@@ -47,9 +47,9 @@ jobs:
           push: true
           tags: |
             wpengine/site-deploy:latest
-            wpengine/site-deploy:v${{ steps.version.outputs.MAJOR }}
-            wpengine/site-deploy:v${{ steps.version.outputs.MAJOR }}.${{ steps.version.outputs.MINOR }}
-            wpengine/site-deploy:v${{ steps.version.outputs.MAJOR }}.${{ steps.version.outputs.MINOR }}.${{ steps.version.outputs.PATCH }}
+            wpengine/site-deploy:${{ steps.version.outputs.MAJOR }}
+            wpengine/site-deploy:${{ steps.version.outputs.MAJOR }}.${{ steps.version.outputs.MINOR }}
+            wpengine/site-deploy:${{ steps.version.outputs.MAJOR }}.${{ steps.version.outputs.MINOR }}.${{ steps.version.outputs.PATCH }}
           # No cache - we want fresh base image layers for security patches
           no-cache: true
 
