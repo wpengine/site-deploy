@@ -1,5 +1,12 @@
 # @wpengine/site-deploy
 
+## 1.0.7
+
+### Patch Changes
+
+- a8ead64: Remove dependency on instrumentisto/rsync-ssh
+- d8a3008: Update base image alpine 3.20 > 3.23
+
 ## 1.0.6
 
 ### Patch Changes
