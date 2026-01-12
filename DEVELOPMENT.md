@@ -19,7 +19,7 @@ We use the [feature branch workflow](https://www.atlassian.com/git/tutorials/com
 
 We use [Changesets](https://github.com/changesets/changesets) to automate versioning and releasing. When you are ready to release, the first step is to create the new version.
 
-1. Go to pull requests and view the automated "Version Action" PR.
+1. Go to pull requests and view the automated "Version Image" PR.
 2. Review the PR:
     - [ ] Changelog entries were created.
     - [ ] Version number in package.json was bumped.
