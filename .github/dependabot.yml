@@ -6,11 +6,11 @@ updates:
       interval: "daily"
     open-pull-requests-limit: 10
     reviewers:
-      - "wpengine/p-e-team-domino"
+      - "wpengine/mario"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
     reviewers:
-      - "wpengine/p-e-team-domino"
+      - "wpengine/mario"
