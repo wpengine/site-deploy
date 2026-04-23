@@ -1,1 +1,7 @@
 * @wpengine/mario
+
+# Dependency files: both the bot and the team are code owners for these paths
+package.json @pe-domino-bot @wpengine/mario
+package-lock.json @pe-domino-bot @wpengine/mario
+Dockerfile @pe-domino-bot @wpengine/mario
+docker-compose.yml @pe-domino-bot @wpengine/mario
