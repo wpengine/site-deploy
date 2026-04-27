@@ -15,6 +15,7 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+    open-pull-requests-limit: 10
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -23,4 +24,3 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
     open-pull-requests-limit: 10
-    

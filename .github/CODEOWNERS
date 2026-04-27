@@ -4,3 +4,5 @@
 package.json @pe-domino-bot @wpengine/mario
 package-lock.json @pe-domino-bot @wpengine/mario
 Dockerfile @pe-domino-bot @wpengine/mario
+.github/workflows/*.yml @pe-domino-bot @wpengine/mario
+.github/workflows/*.yaml @pe-domino-bot @wpengine/mario
