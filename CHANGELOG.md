@@ -1,5 +1,12 @@
 # @wpengine/site-deploy
 
+## 1.0.8
+
+### Patch Changes
+
+- 66aa8ec: changeset major version bump 2 -> 3, changeset config options modified to include private packages which our no longer included by default
+- cc7bc8f: bumping project node spec 20->24
+
 ## 1.0.7
 
 ### Patch Changes
