@@ -1,5 +1,11 @@
 # @wpengine/site-deploy
 
+## 1.0.9
+
+### Patch Changes
+
+- 74252fb: Fix rsync 3.5.0 --exclude-from failure by using a temp file instead of /dev/fd
+
 ## 1.0.8
 
 ### Patch Changes
