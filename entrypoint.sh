@@ -111,6 +111,13 @@ sync_files() {
   # Generate the excludes list before using the output with rsync
   local exclude_from; exclude_from="$(generate_exclude_from)"
 
+  # Write the excludes to a regular file. rsync 3.5.0 breaks --exclude-from=/dev/fd/N
+  # (process substitution), so avoid relying on it.
+  local exclude_file; exclude_file="$(mktemp)"
+  # shellcheck disable=SC2064 # expand now: $exclude_file is local and gone at exit
+  trap "rm -f '$exclude_file'" EXIT
+  printf '%s\n' "$exclude_from" > "$exclude_file"
+
   #create multiplex connection 
   ssh -nNf -v -i "${WPE_SSHG_KEY_PRIVATE_PATH}" -o StrictHostKeyChecking=no -o ControlMaster=yes -o ControlPath="$SSH_PATH/ctl/%C" "$WPE_FULL_HOST"
   echo "!!! MULTIPLEX SSH CONNECTION ESTABLISHED !!!"
@@ -118,7 +125,7 @@ sync_files() {
   set -x
   rsync --rsh="ssh -v -p 22 -i ${WPE_SSHG_KEY_PRIVATE_PATH} -o StrictHostKeyChecking=no -o 'ControlPath=$SSH_PATH/ctl/%C'" \
         "${FLAGS_ARRAY[@]}" \
-        --exclude-from=<( { { set +x; } 2>/dev/null; echo "$exclude_from"; } ) \
+        --exclude-from="$exclude_file" \
         --chmod=D775,F664 "${SRC_PATH}" "${WPE_DESTINATION}"
   set +x
 
