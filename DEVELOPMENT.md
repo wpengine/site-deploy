@@ -49,17 +49,18 @@ The scheduled monthly rebuild ensures security patches are applied even when the
 
 ### Base Image Maintenance
 
-The Dockerfile uses Alpine Linux as its base image. The base image follows this update pattern:
+The Dockerfile uses the current Ubuntu LTS release as its base image. The base image follows this update pattern:
 
-- **Dependabot** monitors for new Alpine versions and creates PRs automatically
-- Alpine releases new versions every 6 months (roughly June and December)
-- **Scheduled rebuilds** pick up security patches from `apk upgrade` monthly
+- Ubuntu releases a new LTS version every 2 years (in April of even years)
+- **Dependabot** is configured to ignore minor and major `ubuntu` updates, so it never proposes a non-LTS release. Moving to a new LTS is a manual task.
+- **Scheduled rebuilds** pick up security patches from `apt-get upgrade` monthly
 
-When Dependabot opens a PR for a new Alpine version:
+When a new Ubuntu LTS is released:
 
-1. Review the [Alpine release notes](https://alpinelinux.org/releases/) for breaking changes and ensure tests are passing.
-2. Add a changeset to the PR (`npx changeset`) so a proper release is created when merged
-3. Merge the PR to trigger a new versioned release
+1. Review the [Ubuntu release notes](https://wiki.ubuntu.com/Releases) for breaking changes.
+2. Update the `FROM` line in the `Dockerfile` and ensure tests are passing, including `make test-image`.
+3. Compare `rsync --version`, `php -v`, `ssh -V` and `bash --version` against the previous image, and add a changeset (`npx changeset`) that lists any changes so a proper release is created when merged
+4. Merge the PR to trigger a new versioned release
 
 ## Building and versioning locally
 
@@ -70,4 +71,8 @@ make build       # Builds the image locally
 make version     # Builds the image and creates version tags
 make list-images # Shows all tagged versions of the image
 make clean       # Deletes all tagged versions of the image
+make test-unit   # Runs the shell tests on the host
+make test-image  # Builds the image and runs the shell tests inside it
 ```
+
+`make test-image` runs the tests with the image's own `bash`, `rsync`, `find` and `xargs`, which can behave differently from the versions on your machine.
