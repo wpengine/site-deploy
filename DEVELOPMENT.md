@@ -59,7 +59,7 @@ When a new Ubuntu LTS is released:
 
 1. Review the [Ubuntu release notes](https://wiki.ubuntu.com/Releases) for breaking changes.
 2. Update the `FROM` line in the `Dockerfile` and ensure tests are passing, including `make test-image`.
-3. Compare `rsync --version`, `php -v`, `ssh -V` and `bash --version` against the previous image, and add a changeset (`npx changeset`) that lists any changes so a proper release is created when merged
+3. Compare `rsync --version`, `ssh -V` and `bash --version` against the previous image, and add a changeset (`npx changeset`) that lists any changes so a proper release is created when merged
 4. Merge the PR to trigger a new versioned release
 
 ## Building and versioning locally

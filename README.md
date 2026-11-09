@@ -32,7 +32,6 @@ WPE_ENV=yourinstall
 # Optional. Default values shown.
 REMOTE_PATH=
 SRC_PATH=.
-PHP_LINT=FALSE
 CACHE_CLEAR=TRUE
 SCRIPT=
 FLAGS=-azvr --inplace --exclude='.*'

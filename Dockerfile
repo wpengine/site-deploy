@@ -14,7 +14,6 @@ RUN apt-get update \
             openssh-client sshpass \
             gettext-base \
             ca-certificates tzdata \
-            php-cli \
  && update-ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 # Add entrypoint and utils
