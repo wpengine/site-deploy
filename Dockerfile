@@ -1,16 +1,22 @@
-FROM alpine:3.24
+FROM ubuntu:26.04
 
-RUN apk update \
- && apk upgrade \
- && apk add --no-cache \
+# Per WP Engine Security guidelines, all WPE images must have the following labels
+LABEL com.wpengine.owner="sec-mario"
+LABEL com.wpengine.repo="site-deploy"
+LABEL com.wpengine.jira="MARIO"
+LABEL com.wpengine.slack="pe-mario-public"
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get upgrade -y \
+ && apt-get install -y --no-install-recommends \
             rsync \
-            openssh-client-default sshpass \
-            gettext-envsubst \
+            openssh-client sshpass \
+            gettext-base \
             ca-certificates tzdata \
-            bash \
-            php \
+            php-cli \
  && update-ca-certificates \
- && rm -rf /var/cache/apk/*
+ && rm -rf /var/lib/apt/lists/*
 # Add entrypoint and utils
 COPY utils /utils
 ADD entrypoint.sh /entrypoint.sh

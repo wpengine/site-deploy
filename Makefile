@@ -1,4 +1,4 @@
-.PHONY: clean list-images build publish
+.PHONY: clean list-images build publish test-unit test-image
 
 IMAGE_NAME ?= wpengine/site-deploy
 MAJOR_VERSION ?= 1
@@ -25,3 +25,8 @@ version: build
 test-unit:
 	./tests/test_functions.sh
 	./tests/test_generate_path_excludes.sh
+
+test-image: build
+	docker run --rm --platform linux/amd64 -v "$(CURDIR)":/workspace:ro -w /workspace --entrypoint bash $(IMAGE) -c '\
+		./tests/test_functions.sh && \
+		./tests/test_generate_path_excludes.sh'
