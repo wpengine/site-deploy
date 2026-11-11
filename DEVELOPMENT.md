@@ -42,7 +42,6 @@ Docker images are built and pushed automatically to Docker Hub and the internal 
 
 | Trigger | Tags Updated | Source |
 |---------|--------------|--------|
-| Push to `main` | `latest` | GitHub Actions |
 | New version release | `latest`, `vX`, `vX.Y`, `vX.Y.Z` | GitHub Actions |
 | Monthly schedule (1st of month) | `latest`, `vX`, `vX.Y`, `vX.Y.Z` | GitHub Actions |
 | Manual trigger | `latest`, `vX`, `vX.Y`, `vX.Y.Z` | GitHub Actions |
