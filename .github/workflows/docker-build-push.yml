@@ -1,0 +1,132 @@
+name: Docker Build and Push
+
+# The registry's Workload Identity provider only trusts this file name, called
+# from refs/heads/main.
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Git ref to build.'
+        required: true
+        type: string
+      version:
+        description: 'Version (X.Y.Z) to tag. Also tags latest.'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-push:
+    name: Build, Test and Push Docker Image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # The e2e test mutates a shared WP Engine site, so it must not overlap
+    # with the e2e-deploy workflow. Keep the group name in sync with it.
+    concurrency:
+      group: e2e-sitedeploye2e
+      cancel-in-progress: false
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Generate tags
+        id: tags
+        env:
+          VERSION: ${{ inputs.version }}
+          GAR_IMAGE: ${{ secrets.GAR_IMAGE }}
+        run: |
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
+          TAGS=("latest" "$MAJOR" "$MAJOR.$MINOR" "$MAJOR.$MINOR.$PATCH")
+          {
+            echo "TAGS<<EOF"
+            for image in wpengine/site-deploy "$GAR_IMAGE"; do
+              for tag in "${TAGS[@]}"; do
+                echo "$image:$tag"
+              done
+            done
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "GAR_HOST=${GAR_IMAGE%%/*}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Login to Artifact Registry
+        run: gcloud auth configure-docker ${{ steps.tags.outputs.GAR_HOST }} --quiet
+
+      # Build once and load into the local daemon. The image that passes the
+      # tests below is the same one that gets pushed.
+      - name: Build image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: site-deploy:candidate
+          # No cache - we want fresh base image layers for security patches
+          no-cache: true
+
+      # -o build skips the rebuild so the tests run against the loaded image.
+      - name: Run image tests
+        run: make -o build test-image IMAGE=site-deploy:candidate
+
+      - name: Bump test plugin version number
+        run: sed -i 's/0.0.1/0.0.2/' tests/data/plugins/test-plugin/test-plugin.php
+
+      # Mirrors how a GitHub container action runs the image, with the same
+      # variables as .github/actions/deploy/action.yml.
+      - name: Deploy to WP Engine with the built image
+        env:
+          WPE_SSHG_KEY_PRIVATE: ${{ secrets.WPE_SSHG_KEY_PRIVATE }}
+          WPE_ENV: sitedeploye2e
+          SRC_PATH: tests/data/plugins/test-plugin
+          REMOTE_PATH: wp-content/plugins/
+          FLAGS: '-r --backup --backup-dir=/tmp --itemize-changes'
+          SCRIPT: tests/data/post-deploy/test-plugin.sh
+          CACHE_CLEAR: 'true'
+        run: |
+          docker run --rm --platform linux/amd64 \
+            -e GITHUB_ACTIONS \
+            -e WPE_SSHG_KEY_PRIVATE -e WPE_ENV -e SRC_PATH -e REMOTE_PATH \
+            -e FLAGS -e SCRIPT -e CACHE_CLEAR \
+            -v "$GITHUB_WORKSPACE":/github/workspace -w /github/workspace \
+            site-deploy:candidate
+
+      - name: Validate deploy results
+        run: |
+          status=$(curl -fsS --retry 3 --retry-delay 5 -H 'Cache-Control: no-cache' \
+            "https://sitedeploye2e.wpengine.com/wp-content/plugins/test-plugin/status.json?run=${GITHUB_RUN_ID}" \
+            | jq -r '.status')
+          echo "Deploy status: $status"
+          [ "$status" = "success" ]
+
+      - name: Push images
+        env:
+          TAGS: ${{ steps.tags.outputs.TAGS }}
+        run: |
+          while read -r image; do
+            docker tag site-deploy:candidate "$image"
+            docker push "$image"
+          done <<< "$TAGS"

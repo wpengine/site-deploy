@@ -34,18 +34,25 @@ The `Dockerfile` is hosted as a Docker image on DockerHub: [wpengine/sitedeploy]
 
 The Docker image is used in both [wpengine/github-action-wpe-site-deploy](https://github.com/wpengine/github-action-wpe-site-deploy) GitHub Action and the [wpengine/wpe-site-deploy]([https://bitbucket.org/azunigawpe/wpe-bb-deploy/src/main/](https://bitbucket.org/wpengine/wpe-site-deploy/src/main/)) Bitbucket Pipe. Any customizations to the image should consider the effect on both services.
 
+Images are also pushed to an internal registry for vulnerability scanning; customers continue to pull from Docker Hub.
+
 ### Automatic Builds
 
-Docker images are built and pushed automatically:
+Docker images are built and pushed automatically to Docker Hub and the internal registry by the reusable `docker-build-push.yml` workflow:
 
 | Trigger | Tags Updated | Source |
 |---------|--------------|--------|
-| Push to `main` | `latest` | Docker Hub Autobuild |
-| New version release | `latest`, `vX`, `vX.Y`, `vX.Y.Z` | Docker Hub Autobuild |
+| New version release | `latest`, `vX`, `vX.Y`, `vX.Y.Z` | GitHub Actions |
 | Monthly schedule (1st of month) | `latest`, `vX`, `vX.Y`, `vX.Y.Z` | GitHub Actions |
 | Manual trigger | `latest`, `vX`, `vX.Y`, `vX.Y.Z` | GitHub Actions |
 
-The scheduled monthly rebuild ensures security patches are applied even when there are no new releases. Both the scheduled and manually triggered workflows use `no-cache` to pull fresh base image layers.
+The scheduled monthly rebuild ensures security patches are applied even when there are no new releases. All builds use `no-cache` to pull fresh base image layers.
+
+Every build is tested before anything is pushed. `docker-build-push.yml` builds the image once, runs `make test-image`, and deploys the e2e test plugin to the `sitedeploye2e` site using that image. The same image is then pushed to both registries. If any check fails, nothing is pushed.
+
+The e2e site is shared with the `e2e-deploy.yml` workflow, so both use the `e2e-sitedeploye2e` concurrency group. GitHub keeps only one pending run per group, so a build waiting behind a running e2e can be cancelled by a newer run. If a release or monthly rebuild shows as cancelled, re-run it.
+
+The internal registry only accepts pushes from `docker-build-push.yml` running on `main`, so manual runs of the scheduled rebuild must be dispatched from `main`, and the workflow file must not be renamed.
 
 ### Base Image Maintenance
 
