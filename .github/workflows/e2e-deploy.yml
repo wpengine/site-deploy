@@ -9,8 +9,10 @@ on:
     branches:
       - main
 
+# Shared with docker-build-push.yml, which runs the same e2e test against the
+# site before pushing an image. Keep the group name in sync with it.
 concurrency:
-  group: ${{ github.workflow }}-main
+  group: e2e-sitedeploye2e
   cancel-in-progress: false
 
 jobs:
