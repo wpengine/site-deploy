@@ -16,7 +16,6 @@ validate() {
   : REMOTE_PATH="${REMOTE_PATH:=""}"
   : SRC_PATH="${SRC_PATH:="."}"
   : FLAGS="${FLAGS:="-azvr --inplace --exclude='.*'"}"
-  : PHP_LINT="${PHP_LINT:="FALSE"}"
   : CACHE_CLEAR="${CACHE_CLEAR:="TRUE"}"
   : SCRIPT="${SCRIPT:=""}"
 }
@@ -82,22 +81,6 @@ setup_ssh_dir() {
   chmod 644 "${KNOWN_HOSTS_PATH}"
 }
 
-check_lint() {
-  if [ "${PHP_LINT^^}" == "TRUE" ]; then
-      echo "Begin PHP Linting."
-      find "$SRC_PATH"/ -name "*.php" -type f -print0 | while IFS= read -r -d '' file; do
-          php -l "$file"
-          status=$?
-          if [[ $status -ne 0 ]]; then
-              echo "FAILURE: Linting failed - $file :: $status" && exit 1
-          fi
-      done
-      echo "PHP Lint Successful! No errors detected!"
-  else
-      echo "Skipping PHP Linting."
-  fi
-}
-
 check_cache() {
   if [ "${CACHE_CLEAR^^}" == "TRUE" ]; then
       CACHE_CLEAR="&& wp --skip-plugins --skip-themes page-cache flush && wp --skip-plugins --skip-themes cdn-cache flush"
@@ -158,6 +141,5 @@ sync_files() {
 validate
 setup_env
 setup_ssh_dir
-check_lint
 check_cache
 sync_files

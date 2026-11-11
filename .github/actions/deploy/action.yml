@@ -8,9 +8,6 @@ inputs:
   WPE_ENV:
     description: "Destination to deploy to WPE"
     required: false
-  PHP_LINT:
-    description: "optional php syntax check"
-    required: false
   FLAGS:
     description: "Optional flags for the deployment"
     required: false
@@ -38,6 +35,5 @@ runs:
     REMOTE_PATH: ${{ inputs.REMOTE_PATH }}
     SRC_PATH: ${{ inputs.SRC_PATH }}
     FLAGS: ${{ inputs.FLAGS }}
-    PHP_LINT: ${{ inputs.PHP_LINT }}
     CACHE_CLEAR: ${{ inputs.CACHE_CLEAR }}
     SCRIPT: ${{ inputs.SCRIPT }}
